@@ -188,16 +188,3 @@ export const startRelease = async (version: string, repositoryId: string, releas
 
   await pause()
 }
-
-export const mergeRelease = async (release: Release, releaseService: ReleaseService) => {
-  renderHeader('merge and deploy')
-
-  const response = await confirm(`Are you sure you want to merge (and deploy) release ${release.version}`)
-  if (!response) return
-
-  console.log()
-  console.log('not implemented yet..')
-  console.log()
-
-  await pause()
-}
