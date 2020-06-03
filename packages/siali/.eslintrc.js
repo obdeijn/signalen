@@ -1,0 +1,50 @@
+module.exports = {
+  root: true,
+  extends: [
+    'plugin:@typescript-eslint/eslint-recommended',
+    'plugin:@typescript-eslint/recommended',
+    'eslint:recommended',
+    'xo-space',
+    'plugin:node/recommended',
+    'plugin:unicorn/recommended'
+  ],
+  plugins: ['graphql', 'node', 'unicorn'],
+  rules: {
+    '@typescript-eslint/camelcase': 'off',
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-namespace': 'off',
+    '@typescript-eslint/no-non-null-assertion': 'off',
+    '@typescript-eslint/no-unused-vars': ['error', {argsIgnorePattern: '^_'}],
+    '@typescript-eslint/no-var-requires': 'off',
+    '@typescript-eslint/member-delimiter-style': ['error', {
+      multiline: {delimiter: 'none', requireLast: false},
+      singleline: {delimiter: 'comma', requireLast: false}
+    }],
+    'graphql/capitalized-type-name': 'error',
+    'graphql/named-operations': 'error',
+    'graphql/no-deprecated-fields': 'error',
+    'graphql/template-strings': ['error', {env: 'literal', tagName: 'gql'}],
+    'node/no-unsupported-features/es-syntax': 'off',
+    'node/shebang': 0,
+    'unicorn/escape-case': 'off',
+    'unicorn/no-process-exit': 'off',
+    'comma-dangle': ['error', 'never'],
+    indent: ['warn', 2, {SwitchCase: 1, MemberExpression: 1, ignoredNodes: []}],
+    'lines-between-class-members': 'off',
+    quotes: ['error', 'single', {avoidEscape: true}],
+    semi: ['error', 'never'],
+    'brace-style': 'off',
+    'capitalized-comments': 'off',
+    curly: 'off',
+    'default-case': 'off',
+    'eol-last': 'off',
+    'max-statements-per-line': 'off',
+    'no-await-in-loop': 'off',
+    'no-console': 'off',
+    'no-multi-spaces': 'off',
+    'no-process-exit': 'off',
+    'no-unused-expressions': 'off',
+    'no-unused-vars': 'off'
+  }
+}
