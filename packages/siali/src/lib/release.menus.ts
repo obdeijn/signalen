@@ -15,9 +15,8 @@ import {
   renderDescription,
   renderGitHubDescription,
   renderLocalDescription,
-  versionIcon,
   startRelease,
-  mergeRelease
+  versionIcon
 } from './release.cli'
 
 import ReleaseService from './release.service'
@@ -153,13 +152,6 @@ export async function mainMenu(
         }
       })
     }
-
-    choices.push(new inquirer.Separator())
-
-    choices.push({
-      name: `🤞 merge and deploy (${pendingRelease.version})`,
-      value: () => mergeRelease(pendingRelease, releaseService)
-    })
 
     choices.push(new inquirer.Separator())
   }
