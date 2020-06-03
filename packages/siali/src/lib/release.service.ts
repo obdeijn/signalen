@@ -156,22 +156,17 @@ export default class ReleaseService {
   }
 
   formatLocalDescription(groupedIssues: GroupedIssues) {
-    const renderJiraIssue = (issue: JiraIssue) => `&nbsp; [[${issue.key}](${issue.url})] ${issue.title}`
-
     const markdown: string[] = []
+    const markdownJiraUrl = (jiraIssue: JiraIssue) => `[[${jiraIssue.key}](${jiraIssue.url})]`
 
     Object.entries(groupedIssues).forEach(([section, issues]) => {
       if (issues.length === 0) return
 
       markdown.push(`## ${iconSlugs[section as IssueType]} ${plur(section.toUpperCase(), 2)} (${issues.length})\n`)
       issues.forEach((issue: Issue) => {
-        markdown.push(`#${issue.number} ${issue.displayTitle}`)
-        if (issue.jira) {
-          if (issue.jiraParent) markdown.push(renderJiraIssue(issue.jiraParent))
-          markdown.push(renderJiraIssue(issue.jira))
-        }
+        if (issue.jira) markdown.push(`#${issue.number} ${markdownJiraUrl(issue.jira)} ${issue.displayTitle}`)
+        else markdown.push(`#${issue.number} ${issue.displayTitle}`)
       })
-      markdown.push('')
     })
 
     return markdown.join('\n')
