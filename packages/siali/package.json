@@ -1,0 +1,179 @@
+{
+  "name": "@signalen/siali",
+  "description": "SIA CLI",
+  "version": "0.0.1",
+  "author": "SIA Team Gemeente Amsterdam",
+  "bin": {
+    "siali": "./bin/run"
+  },
+  "bugs": "https://github.com/amsterdam/signalen/issues",
+  "dependencies": {
+    "@oclif/command": "^1",
+    "@oclif/config": "^1",
+    "@oclif/plugin-help": "^3",
+    "@octokit/graphql": "^4.5.0",
+    "conf": "^6.2.4",
+    "graphql": "^15.0.0",
+    "graphql-tag": "^2.10.3",
+    "inquirer": "^7.1.0",
+    "plur": "^4.0.0",
+    "read-pkg": "^5.2.0",
+    "semver": "^7.3.2",
+    "terminal-link": "^2.1.1"
+  },
+  "devDependencies": {
+    "@oclif/dev-cli": "^1",
+    "@oclif/test": "^1",
+    "@octokit/graphql-schema": "^8.9.1",
+    "@types/chai": "^4",
+    "@types/inquirer": "^6.5.0",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^12",
+    "@types/node-fetch": "^2.5.7",
+    "@types/semver": "^7.2.0",
+    "chai": "^4",
+    "eslint": "^7.1.0",
+    "eslint-config-oclif": "^3.1",
+    "eslint-config-oclif-typescript": "^0.1",
+    "eslint-plugin-graphql": "^4.0.0",
+    "mocha": "^7.2.0",
+    "nyc": "^15.1.0",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.3"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "files": [
+    "/bin",
+    "/lib",
+    "/npm-shrinkwrap.json",
+    "/oclif.manifest.json"
+  ],
+  "homepage": "https://github.com/Amsterdam/signalen",
+  "keywords": [
+    "oclif",
+    "SLI",
+    "CLI",
+    "GitHub",
+    "Jira",
+    "release",
+    "automation",
+    "Gemeente Amsterdam"
+  ],
+  "license": "MIT",
+  "main": "lib/index.js",
+  "oclif": {
+    "commands": "./lib/commands",
+    "bin": "siali",
+    "hooks": {
+      "init": "./lib/hooks/init"
+    },
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
+  },
+  "repository": "Amsterdam/signalen",
+  "scripts": {
+    "postpack": "rm -f oclif.manifest.json",
+    "posttest": "eslint . --ext .ts",
+    "eslint:fix": "eslint . --ext .ts --fix",
+    "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
+    "test": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
+    "version": "oclif-dev readme && git add README.md"
+  },
+  "eslintConfig": {
+    "extends": [
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended",
+      "eslint:recommended",
+      "xo-space",
+      "plugin:node/recommended",
+      "plugin:unicorn/recommended"
+    ],
+    "plugins": [
+      "graphql",
+      "node",
+      "unicorn"
+    ],
+    "rules": {
+      "@typescript-eslint/camelcase": "off",
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-namespace": "off",
+      "@typescript-eslint/no-non-null-assertion": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          "argsIgnorePattern": "^_"
+        }
+      ],
+      "@typescript-eslint/no-var-requires": "off",
+      "@typescript-eslint/member-delimiter-style": [
+        "error",
+        {
+          "multiline": {
+            "delimiter": "none",
+            "requireLast": false
+          },
+          "singleline": {
+            "delimiter": "comma",
+            "requireLast": false
+          }
+        }
+      ],
+      "graphql/capitalized-type-name": "error",
+      "graphql/named-operations": "error",
+      "graphql/no-deprecated-fields": "error",
+      "graphql/template-strings": [
+        "error",
+        {
+          "env": "literal",
+          "tagName": "gql"
+        }
+      ],
+      "node/no-unsupported-features/es-syntax": "off",
+      "node/shebang": 0,
+      "unicorn/escape-case": "off",
+      "unicorn/no-process-exit": "off",
+      "comma-dangle": [
+        "error",
+        "never"
+      ],
+      "indent": [
+        "warn",
+        2,
+        {
+          "SwitchCase": 1,
+          "MemberExpression": 1,
+          "ignoredNodes": []
+        }
+      ],
+      "lines-between-class-members": "off",
+      "quotes": [
+        "error",
+        "single",
+        {
+          "avoidEscape": true
+        }
+      ],
+      "semi": [
+        "error",
+        "never"
+      ],
+      "brace-style": "off",
+      "capitalized-comments": "off",
+      "curly": "off",
+      "default-case": "off",
+      "eol-last": "off",
+      "max-statements-per-line": "off",
+      "no-await-in-loop": "off",
+      "no-console": "off",
+      "no-multi-spaces": "off",
+      "no-process-exit": "off",
+      "no-unused-expressions": "off",
+      "no-unused-vars": "off"
+    }
+  },
+  "types": "lib/index.d.ts"
+}
