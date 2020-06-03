@@ -1,10 +1,6 @@
 import readPkg from 'read-pkg'
 
-const state = {
-  appName: '',
-  homePage: ''
-}
-
+const state = {appName: '', homePage: ''}
 export default state
 
 export async function initializeState(cwd: string) {
