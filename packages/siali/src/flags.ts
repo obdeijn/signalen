@@ -6,7 +6,11 @@ import chalk from 'chalk'
 
 import configuration from './lib/configuration'
 
-const setFlag = async (flagName: string, description: string | undefined, options: IPromptOptions | undefined = undefined) => {
+const setFlag = async (
+  flagName: string,
+  description: string | undefined,
+  options: IPromptOptions | undefined = undefined
+) => {
   const configuredValue = configuration.get(flagName)
   if (configuredValue) return configuredValue
 

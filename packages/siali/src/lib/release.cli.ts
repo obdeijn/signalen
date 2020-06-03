@@ -7,7 +7,7 @@ import {cli} from 'cli-ux'
 import {JiraIssue, Issue, IssueType, GitHubIssue} from './issue.interface'
 import {ReleaseSummary, Release, SemanticVersion} from '../lib/release.interfaces'
 
-import {confirm, pause, fatalError, renderHeader} from './cli'
+import {confirm, pause, fatalError} from './cli'
 
 import ReleaseService, {getSemanticVersionType} from './release.service'
 

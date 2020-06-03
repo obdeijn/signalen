@@ -90,20 +90,19 @@ export async function lastReleases(releaseService: ReleaseService, releases: und
   renderHeader('release summary browser')
 
   await menu('Choose a release', [
-    ...releases.map((release: any) => {
-      return {
-        name: `${versionIcon(release.version)} ${chalk.green(release.version)}`,
-        value: async () => {
-          console.clear()
-          const fullRelease = await loadReleaseByVersion(release.version, releaseService)
-          console.clear()
+    ...releases.map((release: any) => ({
+      name: `${versionIcon(release.version)} ${chalk.green(release.version)}`,
+      value: async () => {
+        console.clear()
+        const fullRelease = await loadReleaseByVersion(release.version, releaseService)
+        console.clear()
 
-          renderDescription(fullRelease)
+        renderDescription(fullRelease)
 
-          await pause()
-          return lastReleases(releaseService, releases)
-        }
-      }}),
+        await pause()
+        return lastReleases(releaseService, releases)
+      }
+    })),
     new inquirer.Separator(),
     menuGoBack()
   ])

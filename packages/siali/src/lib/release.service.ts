@@ -67,9 +67,9 @@ export default class ReleaseService {
       unknown: []
     }
 
-    Object.values(issues.reduce((groupedIssues: GroupedIssues, issue: Issue) => {
-      groupedIssues[issue.type].push(issue)
-      return groupedIssues
+    Object.values(issues.reduce((group: GroupedIssues, issue: Issue) => {
+      group[issue.type].push(issue)
+      return group
     }, groupedIssues))
 
     return groupedIssues
@@ -88,7 +88,7 @@ export default class ReleaseService {
 
     return response.repository.pullRequest.commits.edges
       .map((edge: {node: {commit: any}}): GitHubIssue[] => edge.node.commit.associatedPullRequests.edges[0].node)
-      .sort((current: GitHubIssue, next: GitHubIssue) => {return (current.number > next.number) ? 1 : -1 })
+      .sort((current: GitHubIssue, next: GitHubIssue) => current.number > next.number ? 1 : -1)
       .reduce((array: GitHubIssue[], gitHubIssue: GitHubIssue) => {
         if (gitHubIssue.number === releaseSummary.number) return array
 
@@ -223,11 +223,11 @@ export default class ReleaseService {
     }
   }
 
-  async createPullRequest(title: string, repositoryId: string, baseRefName: string, headRefName: string) {
+  createPullRequest(title: string, repositoryId: string, baseRefName: string, headRefName: string) {
     return this.gitHubService.mutation(createPullRequestMutation, {
       createPullRequestInput: {
         title,
-        repositoryId: repositoryId,
+        repositoryId,
         baseRefName,
         headRefName
         // body,
@@ -235,7 +235,7 @@ export default class ReleaseService {
     })
   }
 
-  async getRefs() {
+  getRefs() {
     return this.gitHubService.query(refsQuery, {})
   }
 
@@ -244,15 +244,15 @@ export default class ReleaseService {
     return response.repository.ref.target.oid
   }
 
-  async deleteBranch(refId: string) {
+  deleteBranch(refId: string) {
     return this.gitHubService.mutation(deleteBranchMutation, {deleteRefInput: {refId}})
   }
 
-  async createBranch(repositoryId: string, name: string, oid: string) {
+  createBranch(repositoryId: string, name: string, oid: string) {
     return this.gitHubService.mutation(createBranchMutation, {createRefInput: {name, repositoryId, oid}})
   }
 
-  async updateGitHubDescription(pullRequestId: string, description: string) {
+  updateGitHubDescription(pullRequestId: string, description: string) {
     return this.gitHubService.mutation(updatePullRequestBodyMutation, {pullRequestId, body: description})
   }
 }

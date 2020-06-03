@@ -14,5 +14,7 @@ export default class GitHubService {
 
   public query(query: any, options: any = {}): any { return this.graphql(query, {...this.defaultOptions, ...options}) }
 
-  public mutation(mutation: any, options: any = {}) { return this.graphql(mutation, {...this.defaultOptions, ...options}) }
+  public mutation(mutation: any, options: any = {}) {
+    return this.graphql(mutation, {...this.defaultOptions, ...options})
+  }
 }

@@ -33,7 +33,7 @@ export default class ReleaseCommand extends Command {
   }
 
   async run() {
-    const {flags} = this.parse(ReleaseCommand)
+    const {flags} = this.parse(ReleaseCommand) // eslint-disable-line no-shadow
 
     renderHeader('manager')
 
