@@ -31,9 +31,10 @@ const iconSlugs = {
   ticket: ':ticket:',
   story: ':book:',
   chore: ':wrench:',
-  unknown: ':face_palm:',
+  unknown: ':facepalm:',
   'e2e test': ':traffic_light:',
-  'core task': ':package:'
+  'core task': ':package:',
+  task: ':label:'
 }
 
 export const getSemanticVersionType = (version: string): SemanticVersion => {
@@ -64,6 +65,7 @@ export default class ReleaseService {
       chore: [],
       'e2e test': [],
       'core task': [],
+      task: [],
       unknown: []
     }
 
@@ -156,7 +158,7 @@ export default class ReleaseService {
   }
 
   formatLocalDescription(groupedIssues: GroupedIssues) {
-    const renderJiraIssue = (issue: JiraIssue) => `&nbsp; [[${issue.key}](${issue.url})] ${issue.title}`
+    const renderJiraIssue = (issue: JiraIssue) => `  [[${issue.key}](${issue.url})] ${issue.title}`
 
     const markdown: string[] = []
 
@@ -165,7 +167,7 @@ export default class ReleaseService {
 
       markdown.push(`## ${iconSlugs[section as IssueType]} ${plur(section.toUpperCase(), 2)} (${issues.length})\n`)
       issues.forEach((issue: Issue) => {
-        markdown.push(`#${issue.number} ${issue.displayTitle}`)
+        markdown.push(`- #${issue.number} ${issue.displayTitle}`)
         if (issue.jira) {
           if (issue.jiraParent) markdown.push(renderJiraIssue(issue.jiraParent))
           markdown.push(renderJiraIssue(issue.jira))
