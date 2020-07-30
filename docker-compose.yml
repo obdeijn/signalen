@@ -1,0 +1,34 @@
+version: '3.5'
+services:
+  amsterdam:
+    build:
+      dockerfile: Dockerfile
+      context: ./domains/amsterdam/
+      args:
+        - BUILD_ENV=acc
+    environment:
+      - TZ=Europe/Amsterdam
+    ports:
+      - "3001:80"
+
+  amsterdamsebos:
+    build:
+      dockerfile: Dockerfile
+      context: ./domains/amsterdamsebos/
+      args:
+        - BUILD_ENV=acc
+    environment:
+      - TZ=Europe/Amsterdam
+    ports:
+      - "3001:80"
+
+  weesp:
+    build:
+      dockerfile: Dockerfile
+      context: ./domains/weesp/
+      args:
+        - BUILD_ENV=acc
+    environment:
+      - TZ=Europe/Amsterdam
+    ports:
+      - "3001:80"
