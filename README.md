@@ -1,1 +1,1 @@
-# Signalen experimental mono repo (WIP)
+# Signalen mono repo
