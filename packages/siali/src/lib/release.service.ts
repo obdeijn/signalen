@@ -34,7 +34,8 @@ const iconSlugs = {
   unknown: ':facepalm:',
   'e2e test': ':traffic_light:',
   'core task': ':package:',
-  task: ':label:'
+  task: ':label:',
+  spike: ':zap:'
 }
 
 export const getSemanticVersionType = (version: string): SemanticVersion => {
@@ -66,7 +67,8 @@ export default class ReleaseService {
       'e2e test': [],
       'core task': [],
       task: [],
-      unknown: []
+      unknown: [],
+      spike: []
     }
 
     Object.values(issues.reduce((groupedIssues: GroupedIssues, issue: Issue) => {
@@ -158,7 +160,7 @@ export default class ReleaseService {
   }
 
   formatLocalDescription(groupedIssues: GroupedIssues) {
-    const renderJiraIssue = (issue: JiraIssue) => `  [[${issue.key}](${issue.url})] ${issue.title}`
+    const renderJiraIssue = (issue: JiraIssue) => `  [${issue.key}] ${issue.title}`
 
     const markdown: string[] = []
 

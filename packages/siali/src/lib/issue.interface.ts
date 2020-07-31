@@ -22,6 +22,7 @@ export interface GroupedIssues {
   'e2e test': Issue[]
   'core task': Issue[]
   task: Issue[]
+  spike: Issue[]
 }
 
 export interface JiraIssue {
