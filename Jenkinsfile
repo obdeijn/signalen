@@ -40,8 +40,8 @@ Boolean IS_SEMVER_TAG = BRANCH ==~ /v(\d{1,3}\.){2}\d{1,3}/
 
 properties([
   parameters([
-    string(defaultValue: '', description: 'Release version van de signals-frontend (vX.XX.XX)', name: 'APP_VERSION'),
-    string(defaultValue: '', description: 'Release version van de signals monorepo (vX.XX.XX)', name: 'CONFIG_VERSION')
+    string(defaultValue: '', description: 'Release versie tag van de signals-frontend (vX.XX.XX)', name: 'APP_VERSION'),
+    string(defaultValue: '', description: 'Release versie tag van de signals monorepo (vX.XX.XX)', name: 'CONFIG_VERSION')
   ])])
 
 node('BS16 || BS17') {

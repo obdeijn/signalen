@@ -62,13 +62,13 @@ build-base:                            ## build and tag the base signals contain
 clean:
 	$(dc) down -v --remove-orphans
 
-amsterdam:                             ## starts signals amsterdam on port 3001
+amsterdam: build-base                  ## starts signals amsterdam on port 3001
 	$(dc) up --build amsterdam
 
-amsterdamsebos:                        ## starts signals amsterdamsebos on port 3001
+amsterdamsebos: build-base             ## starts signals amsterdamsebos on port 3001
 	$(dc) up --build amsterdamsebos
 
-weesp:                                 ## starts signals weesp on port 3001
+weesp: build-base                      ## starts signals weesp on port 3001
 	$(dc) up --build weesp
 
 login-amsterdam:                       ## execute a command on the amsterdam container
