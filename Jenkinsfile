@@ -16,7 +16,7 @@ def tryStep(String message, Closure block, Closure tearDown = null) {
 def buildAndPush(String configuration, String tag, String environment) {
     docker.withRegistry("${DOCKER_REGISTRY_HOST}",'docker_registry_auth') {
         sh 'pwd'
-        def image = docker.build("ois/signals-amsterdam:${env.BUILD_NUMBER}",
+        def image = docker.build("ois/signals-${configuration}:${env.BUILD_NUMBER}",
         "--shm-size 1G " +
         "--build-arg BUILD_ENV=${environment} " +
         "./domains/${configuration} ")
@@ -24,6 +24,17 @@ def buildAndPush(String configuration, String tag, String environment) {
         image.push(tag)
     }
 }
+
+def deploy(String appName, String tag) {
+    build job: 'Subtask_Openstack_Playbook',
+    parameters: [
+        [$class: 'StringParameterValue', name: 'INVENTORY', value: tag],
+        [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy.yml'],
+        [$class: 'StringParameterValue', name: 'PLAYBOOKPARAMS', value: "-e cmdb_id=${appName}"],
+    ]
+
+}
+
 
 String BRANCH = "${env.BRANCH_NAME}"
 Boolean IS_SEMVER_TAG = BRANCH ==~ /v(\d{1,3}\.){2}\d{1,3}/
@@ -57,9 +68,6 @@ node('BS16 || BS17') {
     }
 
     stage('Build signals frontend') {
-        // steps {
-        //   sh 'make build-base BUILD_PATH=./signals-frontend'
-        // }
         tryStep "build", {
             docker.withRegistry("${DOCKER_REGISTRY_HOST}",'docker_registry_auth') {
                 def cachedImage = docker.image("ois/signalsfrontend:latest")
@@ -98,5 +106,23 @@ node('BS16 || BS17') {
           buildAndPush "weesp", "acceptance", "acc"
         }
     }
+
+    // stage("Deploy signals amsterdam to ACC") {
+    //     tryStep "deployment", {
+    //         deploy "app_signals-amsterdam" "acceptance"
+    //     }
+    // }
+
+    // stage("Deploy signals amsterdamsebos to ACC") {
+    //     tryStep "deployment", {
+    //         deploy "app_signals-amsterdamsebos" "acceptance"
+    //     }
+    // }
+
+    // stage("Deploy signals weesp to ACC") {
+    //     tryStep "deployment", {
+    //         deploy "app_signals-weesp" "acceptance"
+    //     }
+    // }
 
 }
