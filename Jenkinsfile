@@ -35,14 +35,21 @@ def deploy(String appName, String tag) {
 
 }
 
-
 String BRANCH = "${env.BRANCH_NAME}"
 Boolean IS_SEMVER_TAG = BRANCH ==~ /v(\d{1,3}\.){2}\d{1,3}/
+
+properties([
+  parameters([
+    string(defaultValue: '', description: 'Release version van de signals-frontend (vX.XX.XX)', name: 'APP_VERSION'),
+    string(defaultValue: '', description: 'Release version van de signals monorepo (vX.XX.XX)', name: 'CONFIG_VERSION')
+  ])])
 
 node('BS16 || BS17') {
 
     stage('Validate configuration schema\'s') {
         tryStep "build", {
+            sh "echo starting to build signals-fronten ${params.APP_VERSION} with the signals configuration ${params.CONFIG_VERSION}"
+
             sh 'echo Skip this step for now. npx is not present on the build server'
             // sh 'make validate-schemas'
         }
