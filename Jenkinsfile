@@ -76,16 +76,14 @@ node('BS16 || BS17') {
 
     stage('Build signals frontend') {
         tryStep "build", {
-            docker.withRegistry("${DOCKER_REGISTRY_HOST}",'docker_registry_auth') {
+            docker.withRegistry("${DOCKER_REGISTRY_HOST}", 'docker_registry_auth') {
                 def cachedImage = docker.image("ois/signalsfrontend:latest")
 
                 if (cachedImage) {
                     cachedImage.pull()
                 }
 
-                def buildParams = "--shm-size 1G " +
-                    "--build-arg BUILD_NUMBER=${env.BUILD_NUMBER} "
-
+                def buildParams = "--shm-size 1G " + "--build-arg BUILD_NUMBER=${env.BUILD_NUMBER} "
                 buildParams += IS_SEMVER_TAG ? "--build-arg GIT_BRANCH=${BRANCH} " : ''
                 buildParams += './signals-frontend'
 
@@ -96,21 +94,43 @@ node('BS16 || BS17') {
         }
     }
 
-    stage("Build and push amsterdam acceptance image") {
-        tryStep "build", {
-            buildAndPush "amsterdam", "acceptance", "acc"
-        }
-    }
+    // stage("Build and push amsterdam acceptance image") {
+    //     tryStep "build", {
+    //         buildAndPush "amsterdam", "acceptance", "acc"
+    //     }
+    // }
 
-    stage("Build and push amsterdamsebos acceptance image") {
-        tryStep "build", {
-          buildAndPush "amsterdamsebos", "acceptance", "acc"
-        }
-    }
+    // stage("Build and push amsterdamsebos acceptance image") {
+    //     tryStep "build", {
+    //       buildAndPush "amsterdamsebos", "acceptance", "acc"
+    //     }
+    // }
 
-    stage("Build and push weesp acceptance image") {
-        tryStep "build", {
-          buildAndPush "weesp", "acceptance", "acc"
+    // stage("Build and push weesp acceptance image") {
+    //     tryStep "build", {
+    //       buildAndPush "weesp", "acceptance", "acc"
+    //     }
+    // }
+
+    stage('Build images') {
+        parallel {
+            stage("Build and push amsterdam acceptance image") {
+                tryStep "build", {
+                    buildAndPush "amsterdam", "acceptance", "acc"
+                }
+            }
+
+            stage("Build and push amsterdamsebos acceptance image") {
+                tryStep "build", {
+                  buildAndPush "amsterdamsebos", "acceptance", "acc"
+                }
+            }
+
+            stage("Build and push weesp acceptance image") {
+                tryStep "build", {
+                  buildAndPush "weesp", "acceptance", "acc"
+                }
+            }
         }
     }
 
@@ -131,5 +151,4 @@ node('BS16 || BS17') {
     //         deploy "app_signals-weesp" "acceptance"
     //     }
     // }
-
 }
