@@ -112,26 +112,26 @@ node('BS16 || BS17') {
     //     }
     // }
 
-    stage('Build images') {
-      parallel {
-          stage('Branch A') {
-              agent {
-                        label "for-branch-a"
-                    }
-                    steps {
-                        echo "On Branch A"
-                    }
-                }
-                stage('Branch B') {
-                    agent {
-                        label "for-branch-b"
-                    }
-                    steps {
-                        echo "On Branch B"
-                    }
-                }
-              }
-    }
+    // stage('Build images') {
+    //   parallel {
+    //       stage('Branch A') {
+    //           agent {
+    //                     label "for-branch-a"
+    //                 }
+    //                 steps {
+    //                     echo "On Branch A"
+    //                 }
+    //             }
+    //             stage('Branch B') {
+    //                 agent {
+    //                     label "for-branch-b"
+    //                 }
+    //                 steps {
+    //                     echo "On Branch B"
+    //                 }
+    //             }
+    //           }
+    // }
 
         // parallel {
         //     stage("Build and push amsterdam acceptance image") {
