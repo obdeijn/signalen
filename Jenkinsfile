@@ -113,9 +113,9 @@ node('BS16 || BS17') {
     // }
 
     stage('Build images') {
-            parallel {
-                stage('Branch A') {
-                    agent {
+      parallel {
+          stage('Branch A') {
+              agent {
                         label "for-branch-a"
                     }
                     steps {
@@ -131,7 +131,7 @@ node('BS16 || BS17') {
                     }
                 }
               }
-            }
+    }
 
         // parallel {
         //     stage("Build and push amsterdam acceptance image") {
@@ -152,7 +152,7 @@ node('BS16 || BS17') {
         //         }
         //     }
         // }
-    }
+    // }
 
     // stage("Deploy signals amsterdam to ACC") {
     //     tryStep "deployment", {
