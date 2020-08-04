@@ -75,84 +75,42 @@ node('BS16 || BS17') {
     }
 
     stage('Build signals frontend') {
-        // tryStep "build", {
-        //     docker.withRegistry("${DOCKER_REGISTRY_HOST}", 'docker_registry_auth') {
-        //         def cachedImage = docker.image("ois/signalsfrontend:latest")
+        tryStep "build", {
+            docker.withRegistry("${DOCKER_REGISTRY_HOST}", 'docker_registry_auth') {
+                def cachedImage = docker.image("ois/signalsfrontend:latest")
 
-        //         if (cachedImage) {
-        //             cachedImage.pull()
-        //         }
+                if (cachedImage) {
+                    cachedImage.pull()
+                }
 
-        //         def buildParams = "--shm-size 1G " + "--build-arg BUILD_NUMBER=${env.BUILD_NUMBER} "
-        //         buildParams += IS_SEMVER_TAG ? "--build-arg GIT_BRANCH=${BRANCH} " : ''
-        //         buildParams += './signals-frontend'
+                def buildParams = "--shm-size 1G " + "--build-arg BUILD_NUMBER=${env.BUILD_NUMBER} "
+                buildParams += IS_SEMVER_TAG ? "--build-arg GIT_BRANCH=${BRANCH} " : ''
+                buildParams += './signals-frontend'
 
-        //         def image = docker.build("ois/signalsfrontend:${env.BUILD_NUMBER}", buildParams)
-        //         image.push()
-        //         image.push("latest")
-        //     }
-        // }
+                def image = docker.build("ois/signalsfrontend:${env.BUILD_NUMBER}", buildParams)
+                image.push()
+                image.push("latest")
+            }
+        }
     }
 
-    // stage("Build and push amsterdam acceptance image") {
-    //     tryStep "build", {
-    //         buildAndPush "amsterdam", "acceptance", "acc"
-    //     }
-    // }
+    stage("Build and push amsterdam acceptance image") {
+        tryStep "build", {
+            buildAndPush "amsterdam", "acceptance", "acc"
+        }
+    }
 
-    // stage("Build and push amsterdamsebos acceptance image") {
-    //     tryStep "build", {
-    //       buildAndPush "amsterdamsebos", "acceptance", "acc"
-    //     }
-    // }
+    stage("Build and push amsterdamsebos acceptance image") {
+        tryStep "build", {
+          buildAndPush "amsterdamsebos", "acceptance", "acc"
+        }
+    }
 
-    // stage("Build and push weesp acceptance image") {
-    //     tryStep "build", {
-    //       buildAndPush "weesp", "acceptance", "acc"
-    //     }
-    // }
-
-    // stage('Build images') {
-    //   parallel {
-    //       stage('Branch A') {
-    //           agent {
-    //                     label "for-branch-a"
-    //                 }
-    //                 steps {
-    //                     echo "On Branch A"
-    //                 }
-    //             }
-    //             stage('Branch B') {
-    //                 agent {
-    //                     label "for-branch-b"
-    //                 }
-    //                 steps {
-    //                     echo "On Branch B"
-    //                 }
-    //             }
-    //           }
-    // }
-
-        // parallel {
-        //     stage("Build and push amsterdam acceptance image") {
-        //         tryStep "build", {
-        //             buildAndPush "amsterdam", "acceptance", "acc"
-        //         }
-        //     }
-
-        //     stage("Build and push amsterdamsebos acceptance image") {
-        //         tryStep "build", {
-        //           buildAndPush "amsterdamsebos", "acceptance", "acc"
-        //         }
-        //     }
-
-        //     stage("Build and push weesp acceptance image") {
-        //         tryStep "build", {
-        //           buildAndPush "weesp", "acceptance", "acc"
-        //         }
-        //     }
-        // }
-    // }
+    stage("Build and push weesp acceptance image") {
+        tryStep "build", {
+          buildAndPush "weesp", "acceptance", "acc"
+        }
+    }
 
     // stage("Deploy signals amsterdam to ACC") {
     //     tryStep "deployment", {
