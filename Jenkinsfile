@@ -49,8 +49,8 @@ node('BS16 || BS17') {
     stage('Validate configuration schema\'s') {
         tryStep "build", {
             sh "echo starting to build signals-fronten ${params.APP_VERSION} with the signals configuration ${params.CONFIG_VERSION}"
-
             sh 'echo Skip this step for now. npx is not present on the build server'
+            nodejs(nodeJSInstallationName: 'node12') { sh 'make validate-schemas' }
             // sh 'make validate-schemas'
         }
     }
