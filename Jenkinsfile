@@ -45,6 +45,9 @@ properties([
   ])])
 
 node('BS16 || BS17') {
+    ansiColor('xterm') {
+      echo(String.format("%s%s %s%s", '\u001B[35m', '[INFO]', 'testing ansi colors...', '\u001B[0m'))
+    }
 
     stage('Validate configuration schema\'s') {
         tryStep "build", {
