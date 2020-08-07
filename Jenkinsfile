@@ -1,3 +1,17 @@
+sectionHeaderStyle = '''
+    color: white;
+    background: green;
+    font-family: Roboto, sans-serif !important;
+    padding: 5px;
+    text-align: center;
+'''
+
+separatorStyle = '''
+    border: 0;
+    border-bottom: 1px dashed #ccc;
+    background: #999;
+'''
+
 def tryStep(String message, Closure block, Closure tearDown = null) {
     try {
         block()
