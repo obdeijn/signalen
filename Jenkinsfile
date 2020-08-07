@@ -40,8 +40,28 @@ Boolean IS_SEMVER_TAG = BRANCH ==~ /v(\d{1,3}\.){2}\d{1,3}/
 
 properties([
   parameters([
-    string(defaultValue: '', description: 'Release versie tag van de signals-frontend (vX.XX.XX)', name: 'APP_VERSION'),
-    string(defaultValue: '', description: 'Release versie tag van de signals monorepo (vX.XX.XX)', name: 'CONFIG_VERSION')
+      [
+          $class: 'ParameterSeparatorDefinition',
+          name: 'FOO_HEADER',
+          sectionHeader: 'Foo Parameters',
+          separatorStyle: separatorStyle,
+          sectionHeaderStyle: sectionHeaderStyle
+      ],
+      string(name: 'FOO 1'),
+      string(name: 'FOO 2'),
+      string(name: 'FOO 3'),
+      [
+          $class: 'ParameterSeparatorDefinition',
+          name: 'BAR_HEADER',
+          sectionHeader: 'Bar Parameters',
+          separatorStyle: separatorStyle,
+          sectionHeaderStyle: sectionHeaderStyle
+      ],
+      string(name: 'BAR 1'),
+      string(name: 'BAR 2'),
+      string(name: 'BAR 3'),
+      string(defaultValue: '', description: 'Release versie tag van de signals-frontend (vX.XX.XX)', name: 'APP_VERSION'),
+      string(defaultValue: '', description: 'Release versie tag van de signals monorepo (vX.XX.XX)', name: 'CONFIG_VERSION')
   ])])
 
 node('BS16 || BS17') {
