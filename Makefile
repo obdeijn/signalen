@@ -26,15 +26,9 @@ JENKINS_PORT=8090
 @WEESP_IMAGE = ${DOCKER_REGISTRY}/signals-weesp_web-container:${IMAGE_TAG}
 @AMSTERDAM_IMAGE = ${DOCKER_REGISTRY}/signals-amsterdam-container:${IMAGE_TAG}
 
-# constructed macro names
-@ENVIRONMENT_SHORT_acceptance := acc
-@ENVIRONMENT_SHORT_production := prod
-@ENVIRONMENT_SHORT_development := dev
-
 # dynamic globals
 DOMAINS = $(shell ls -d domains/* | cut -d '/' -f2)
 SCHEMA_TEMP_FILE = /tmp/signalen-configuration-schema.$(shell git branch -v | grep \* | cut -d ' ' -f2,3 --output-delimiter='_').json
-ENVIRONMENT_SHORT = $(ENVIRONMENT_SHORT_$(ENVIRONMENT))
 SCHEMA_FILE := ${BUILD_PATH}/internals/schemas/${CONFIGURATION_SCHEMA_FILE}
 
 .DEFAULT_GOAL := help
@@ -52,8 +46,8 @@ info: ## dump various variables to screen
 	@echo ENVIRONMENTS=${ENVIRONMENTS}
 	@echo -----------------
 	@echo DOCKER_COMPOSE_FILE=${DOCKER_COMPOSE_FILE}
-	@echo ENVIRONMENT_SHORT=${ENVIRONMENT_SHORT}
 	@echo SCHEMA_TEMP_FILE=${SCHEMA_TEMP_FILE}
+	@echo AWS_ACCOUNT_FRIENDLY=${AWS_ACCOUNT_FRIENDLY}
 	@echo -----------------
 	@echo
 	@echo arguments
@@ -99,7 +93,13 @@ build: ## build Docker Compose images
 	docker-compose -f $(DOCKER_COMPOSE_FILE) build --parallel
 
 validate-schema: ## validate JSON schema with local definition. Usage `make BUILD_PATH=../signals-frontend DOMAIN=amsterdam ENVIRONMENT=acceptance validate-schema-local`
-	npx ajv-cli validate -s ${SCHEMA_FILE} -d domains/${DOMAIN}/${ENVIRONMENT_SHORT}.config.json
+	@if [[ ${ENVIRONMENT} == "acceptance" ]]; then \
+		npx ajv-cli validate -s ${SCHEMA_FILE} -d domains/${DOMAIN}/acc.config.json; \
+	elif [[ ${ENVIRONMENT} == "production" ]]; then \
+		npx ajv-cli validate -s ${SCHEMA_FILE} -d domains/${DOMAIN}/prod.config.json; \
+	else \
+		echo "ENVIRONMENT is invalid: ${environment} (valid values: [acceptance, production])"; \
+	fi
 
 get-schema: ## download JSON validation schema to /tmp
 	wget --no-clobber --quiet https://github.com/Amsterdam/signals-frontend/raw/${FRONTEND_GIT_REF}/internals/schemas/${CONFIGURATION_SCHEMA_FILE} -O ${SCHEMA_TEMP_FILE} | true
