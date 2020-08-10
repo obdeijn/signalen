@@ -40,37 +40,21 @@
     "privacy": "https://www.amsterdam.nl/privacy/specifieke/privacyverklaringen-wonen/meldingen-overlast-privacy/"
   },
   "map": {
-    "municipality": "amsterdam",
+    "municipality": ["amsterdam", "amstelveen"],
     "tiles": {
-      "args": [
-        "https://{s}.data.amsterdam.nl/topo_rd/{z}/{x}/{y}.png"
-      ],
+      "args": ["https://{s}.data.amsterdam.nl/topo_rd/{z}/{x}/{y}.png"],
       "options": {
-        "subdomains": [
-          "t1",
-          "t2",
-          "t3",
-          "t4"
-        ],
+        "subdomains": ["t1", "t2", "t3", "t4"],
         "tms": true,
         "attribution": "Kaartgegevens CC-BY-4.0 Gemeente Amsterdam"
       }
     },
     "options": {
       "maxBounds": [
-        [
-          52.25168,
-          4.64034
-        ],
-        [
-          52.50536,
-          5.10737
-        ]
+        [52.29047115018846, 4.801453143008987],
+        [52.333203310649004, 4.856482877032636]
       ],
-      "center": [
-        52.3731081,
-        4.8932945
-      ],
+      "center": [52.3150683, 4.8280039],
       "zoom": 10,
       "maxZoom": 14,
       "minZoom": 8

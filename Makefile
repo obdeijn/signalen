@@ -75,7 +75,7 @@ login-amsterdam:                       ## execute a command on the amsterdam con
 	$(dc) exec amsterdam sh
 
 login-amsterdamsebos:                  ## execute a command on the amsterdamsebos container
-	$(dc) exec amsterdam sh
+	$(dc) exec amsterdamsebos sh
 
 login-weesp:                           ## execute a command on the weesp container
 	$(dc) exec weesp sh
