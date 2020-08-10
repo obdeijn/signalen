@@ -193,7 +193,7 @@ def prepareJenkinsPipeline() {
       logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')
     ),
     durabilityHint('PERFORMANCE_OPTIMIZED'),
-    [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
+    // [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
     parameters([
       [
         $class: 'ParameterSeparatorDefinition',
