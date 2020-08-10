@@ -44,10 +44,7 @@ info: ## dump various variables to screen
 	@echo -----------------
 	@echo DOMAINS=${DOMAINS}
 	@echo ENVIRONMENTS=${ENVIRONMENTS}
-	@echo -----------------
-	@echo DOCKER_COMPOSE_FILE=${DOCKER_COMPOSE_FILE}
 	@echo SCHEMA_TEMP_FILE=${SCHEMA_TEMP_FILE}
-	@echo AWS_ACCOUNT_FRIENDLY=${AWS_ACCOUNT_FRIENDLY}
 	@echo -----------------
 	@echo
 	@echo arguments
@@ -68,29 +65,28 @@ list-domains: ## list domains
 	@echo ${DOMAINS}
 
 status: ## show Docker Compose process list
-	docker-compose -f $(DOCKER_COMPOSE_FILE) ps
+	docker-compose ps
 
 start: ## start Docker Compose
-	docker-compose -f $(DOCKER_COMPOSE_FILE) up --remove-orphans
+	docker-compose up --remove-orphans
 	@echo
-	@docker-compose -f $(DOCKER_COMPOSE_FILE) ps
+	@docker-compose ps
 
 start-domain: ## start single Docker Compose. Usage `make start DOMAIN=amsterdam`
-	docker-compose -f $(DOCKER_COMPOSE_FILE) up --remove-orphans ${DOMAIN}
+	docker-compose up --remove-orphans ${DOMAIN}
 	@echo
-	@docker-compose -f $(DOCKER_COMPOSE_FILE) ps
+	@docker-compose ps
 
 stop: ## stop Docker Compose
-	docker-compose -f $(DOCKER_COMPOSE_FILE) kill
-	docker-compose -f $(DOCKER_COMPOSE_FILE) rm -v --force
+	docker-compose down -v --remove-orphans
 
 logs: ## tail Docker Compose container logs
-	docker-compose -f docker-compose.yml logs --tail=100 -f ${DOMAIN}
+	docker-compose logs --tail=100 -f ${DOMAIN}
 
 restart: stop start status ## restart Docker Compose
 
 build: ## build Docker Compose images
-	docker-compose -f $(DOCKER_COMPOSE_FILE) build --parallel
+	docker-compose build --parallel
 
 validate-schema: ## validate JSON schema with local definition. Usage `make BUILD_PATH=../signals-frontend DOMAIN=amsterdam ENVIRONMENT=acceptance validate-schema-local`
 	@if [[ ${ENVIRONMENT} == "acceptance" ]]; then \
@@ -119,35 +115,5 @@ build-base: ## build and tag signals-frontend container. Usage `make build-base 
 	docker build -t $(BASE_IMAGE) $(BUILD_PATH)
 	docker tag $(BASE_IMAGE):latest $(FRONTEND_IMAGE)
 
-clean: ## clean Docker Compose
-	docker-compose down -v --remove-orphans
-
-shell: ## execute command on container
+shell: ## execute command on container. Usage `make shell ${ENVIRONMENT}`
 	docker-compose exec ${DOMAIN} sh
-
-docker-list-images: ## list docker images
-	docker images
-
-docker-list-all-images: ## list all docker images
-	docker images --all
-
-docker-list-volumes: ## list docker volumes
-	docker volume ls
-
-docker-list-containers: ## list all docker containers
-	docker container ls --all
-
-docker-list-networks: ## list all docker containers
-	docker network ls
-
-docker-list: ## list docker containers, images, volumes and networks
-	@docker container ls --all
-	@echo
-	@docker images --all
-	@echo
-	@docker volume ls
-	@echo
-	@docker network ls
-
-docker-prune: ## remove stopped docker containers, unused volumes and images and networks
-	docker system prune --all --volumes
