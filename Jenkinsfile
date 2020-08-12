@@ -2,7 +2,7 @@
 
 // -- Options ---------------------------------------------------------------------------------------------------------
 
-DEVELOPMENT = true
+DEVELOPMENT = false
 
 SIGNALEN_REPOSITORY = 'Amsterdam/signalen'
 SIGNALS_FRONTEND_REPOSITORY = 'Amsterdam/signals-frontend'
@@ -69,25 +69,22 @@ enum Colors {
   public Colors(String xterm_code) { this.xterm_code = xterm_code }
 }
 
-def console_log(message, tag, color) {
-  ansiColor('css') { echo(String.format("%s%s %s%s", color.xterm_code, tag, message, '\u001B[0m')) }
-}
+def console_log(message, tag, color) { echo(String.format("%s%s %s%s", color.xterm_code, tag, message, '\u001B[0m')) }
 
-def workspaceInfo(workspace, message) { console_log(message, "[${workspace.name}]", Colors.PURPLE) }
 def info(message) { console_log(message, '[INFO]', Colors.PURPLE) }
 def error(message) { console_log(message, '[ERROR]', Colors.RED) }
 def warn(message) { console_log(message, '[WARNING]', Colors.GREEN) }
 def debug(message) { console_log(message, '[DEBUG]', Colors.CYAN) }
+
 def dryRun(message) { console_log(message, '[DRYRUN]', Colors.CYAN) }
+def workspaceInfo(workspace, message) { console_log(message, "[${workspace.name}]", Colors.PURPLE) }
 
 def logStart(label) { debug("BEGIN ${label}") }
 def logEnd(label) { debug("END ${label}") }
 
-GIT_LOG_COMMAND = 'git show --oneline --date=relative -s'
-
 def workspaceLastCommit(String workspace) {
   dir("${env.WORKSPACE}/${workspace}") {
-    return "${workspace}_" + sh(returnStdout: true, script: GIT_LOG_COMMAND)
+    return "${workspace}_" + sh(returnStdout: true, script: 'git show --oneline --date=relative -s')
   }
 }
 
@@ -168,7 +165,7 @@ def validateSchema(String domain, String environment) {
 }
 
 def prepareJenkinsPipeline() {
-  logStart('preparing Jenkins pipeline')
+  logStart('preparing `signalen` Jenkins pipeline')
 
   if (params.cleanBuild) {
     info('cleaning workspaces')
@@ -223,11 +220,11 @@ def prepareJenkinsPipeline() {
         useRepository: 'signalen'
       ),
       [
-        $class: 'ParameterSeparatorDefinition',
+        sectionHeaderStyle: sectionHeaderStyle,
         name: 'debugParametersHeader',
-        sectionHeader: 'Debug & Maintenance',
+        sectionHeader: 'Debug/Testing/Maintenance',
         separatorStyle: separatorStyle,
-        sectionHeaderStyle: sectionHeaderStyle
+        $class: 'ParameterSeparatorDefinition'
       ],
       booleanParam(name: 'cleanBuild', description: 'Clean workspace before build', defaultValue: false),
       booleanParam(name: 'disableParallelBuilds', description: 'Disable parallel builds', defaultValue: false),
@@ -241,105 +238,108 @@ def prepareJenkinsPipeline() {
     ])
   ])
 
-  logEnd('preparing `signalen` Jenkins pipeline, test 1234')
+  logEnd('preparing `signalen` Jenkins pipeline')
 }
 
 // -- Jenkins pipeline ------------------------------------------------------------------------------------------------
 
-node(JENKINS_NODE) {
-  prepareJenkinsPipeline()
+ansiColor('xterm') {
+  node(JENKINS_NODE) {
+    prepareJenkinsPipeline()
 
-  message = [
-    '',
-    '***********************************************',
-    "Running pipeline with parameters",
-    '***********************************************',
-    "environment = ${params.environment}",
-    '',
-    "signalenRef = ${params.signalenRef}",
-    "signalsFrontendRef = ${params.signalsFrontendRef}",
-    '***********************************************',
-    ''
-  ]
+    message = [
+      '',
+      '***********************************************',
+      "Running pipeline with parameters",
+      '***********************************************',
+      "environment = ${params.environment}",
+      '',
+      "signalenRef = ${params.signalenRef}",
+      "signalsFrontendRef = ${params.signalsFrontendRef}",
+      '***********************************************',
+      ''
+    ]
 
-  info('pipeline info' + message.join('\n'))
+    info('pipeline info' + message.join('\n'))
 
-  stage('Prepare workspaces and initialize state') {
-    info("initializing ${state.workspaces.size()} workspaces")
+    stage('Prepare workspaces and initialize state') {
+      info("initializing ${state.workspaces.size()} workspaces")
 
-    if (params.domain) state.domains = [params.domain]
+      if (params.domain) state.domains = [params.domain]
 
-    state.environment = params.environment
-    state.environmentShort = ENVIRONMENT_MAP[params.environment]
+      state.environment = params.environment
+      state.environmentShort = ENVIRONMENT_MAP[params.environment]
 
-    debug("before - ${workspaceLastCommit('signals-frontend')}")
+      debug("before - ${workspaceLastCommit('signals-frontend')}")
 
-    def stateIds = []
+      def stateIds = []
 
-    state.workspaces.each { key, workspace ->
-      workspace.gitRef = params["${key}Ref"]
+      state.workspaces.each { key, workspace ->
+        workspace.gitRef = params["${key}Ref"]
 
-      def checkoutResult = checkoutWorkspace(workspace, workspace.gitRef)
-      workspace.commitRef = checkoutResult.GIT_COMMIT
+        def checkoutResult = checkoutWorkspace(workspace, workspace.gitRef)
+        workspace.commitRef = checkoutResult.GIT_COMMIT
 
-      workspace.id = "${workspace.name}_${workspace.gitRef}-${workspace.commitRef[0..7]}"
+        workspace.id = "${workspace.name}_${workspace.gitRef}-${workspace.commitRef[0..7]}"
 
-      stateIds.push(workspace.id)
+        stateIds.push(workspace.id)
+      }
+
+      debug("after - ${workspaceLastCommit('signals-frontend')}")
+
+      state.id = "${state.environment}_${stateIds.join('+')}"
     }
 
-    debug("after - ${workspaceLastCommit('signals-frontend')}")
+    stage('Validate configuration schema(\'s)') {
+      def steps = [:]
+      state.domains.each { domain -> steps[domain] = { validateSchema domain, state.environment } }
+      parallel steps
+    }
 
-    state.id = "${state.environment}_${stateIds.join('+')}"
-  }
+    stage('Build and push signals-frontend image') {
+      tryStep "build signals-frontend image", {
+        def workspace = state.workspaces.signalsFrontend
 
-  stage('Validate configuration schema(\'s)') {
-    def steps = [:]
-    state.domains.each { domain -> steps[domain] = { validateSchema domain, state.environment } }
-    parallel steps
-  }
+        info("build image: ${workspace.id} ${workspace.commitRef}")
+        debug("${workspaceLastCommit('signals-frontend')}")
 
-  stage('Build and push signals-frontend image') {
-    tryStep "build signals-frontend image", {
-      def workspace = state.workspaces.signalsFrontend
+        if (params.dryRun) {
+          dryRun('build signals-frontend image')
+        } else {
+          docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_AUTH) {
+            // TODO: is this needed?
+            // def cachedImage = docker.image("ois/signalsfrontend:latest")
+            // if (cachedImage) { cachedImage.pull() }
 
-      info("build image: ${workspace.id} ${workspace.commitRef}")
-      debug("${workspaceLastCommit('signals-frontend')}")
+            def buildParams = "--shm-size 1G " + "--build-arg BUILD_NUMBER=${env.BUILD_NUMBER} "
+            buildParams += IS_SEMVER_TAG ? "--build-arg GIT_BRANCH=${BRANCH} " : ''
+            buildParams += './signals-frontend'
 
-      if (params.dryRun) {
-        dryRun('build signals-frontend image')
-      } else {
-        docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_AUTH) {
-          // TODO: is this needed?
-          // def cachedImage = docker.image("ois/signalsfrontend:latest")
-          // if (cachedImage) { cachedImage.pull() }
-
-          def buildParams = "--shm-size 1G " + "--build-arg BUILD_NUMBER=${env.BUILD_NUMBER} "
-          buildParams += IS_SEMVER_TAG ? "--build-arg GIT_BRANCH=${BRANCH} " : ''
-          buildParams += './signals-frontend'
-
-          def image = docker.build("ois/signalsfrontend:${env.BUILD_NUMBER}", buildParams)
-          image.push()
-          image.push('latest')
+            def image = docker.build("ois/signalsfrontend:${env.BUILD_NUMBER}", buildParams)
+            image.push()
+            image.push('latest')
+          }
         }
       }
     }
-  }
 
-  stage("Build and push domain image(s)") {
-    if (params.disableParallelBuilds) {
-      state.domains.each { domain -> buildAndPush(domain, params.environment, environment) }
-    } else {
-      def steps = [:]
-      state.domains.each { domain ->
-        steps[domain] = { buildAndPush domain, state.environment, state.environmentShort }
+    stage("Build and push domain image(s)") {
+      if (params.disableParallelBuilds) {
+        state.domains.each { domain -> buildAndPush(domain, params.environment, environment) }
+      } else {
+        def steps = [:]
+        state.domains.each { domain ->
+          steps[domain] = { buildAndPush domain, state.environment, state.environmentShort }
+        }
+        parallel steps
       }
-      parallel steps
+    }
+
+    stage('Deploy signals-frontend domain(s)') {
+      tryStep 'deploy signals-frontend domain(s)', {
+        deploy("app_signals-${params.domain}", params.environment)
+      }
     }
   }
 
-  stage('Deploy signals-frontend domain(s)') {
-    tryStep 'deploy signals-frontend domain(s)', {
-      deploy("app_signals-${params.domain}", params.environment)
-    }
-  }
 }
