@@ -129,7 +129,7 @@ def buildAndPush(String configuration, String dockerTag, String environment) {
     docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_AUTH) {
       def image = docker.build(
         "ois/signals-${configuration}:${env.BUILD_NUMBER}",
-        "--build-arg DOCKER_REGISTRY=${DOCKER_REGISTRY_HOST_SHORT} " +
+        "--build-arg DOCKER_REGISTRY=${DOCKER_REGISTRY_HOST} " +
         '--shm-size 1G ' +
         "--build-arg BUILD_ENV=${environment} " +
         "${env.WORKSPACE}/signalen/domains/${configuration}"
