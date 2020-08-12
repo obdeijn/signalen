@@ -64,14 +64,8 @@ sectionHeaderStyle = '''
 // -- Colorized logging -----------------------------------------------------------------------------------------------
 
 enum Colors {
-  BLUE('\u001B[34m'),
-  GREEN('\u001B[32m'),
-  RED('\u001B[31m'),
-  YELLOW('\u001B[33m'),
-  PURPLE('\u001B[35m')
-
+  BLUE('\u001B[34m'), GREEN('\u001B[32m'), RED('\u001B[31m'), CYAN('\u001B[36m'), PURPLE('\u001B[35m')
   public String xterm_code
-
   public Colors(String xterm_code) { this.xterm_code = xterm_code }
 }
 
@@ -83,8 +77,8 @@ def workspaceInfo(workspace, message) { console_log(message, "[${workspace.name}
 def info(message) { console_log(message, '[INFO]', Colors.PURPLE) }
 def error(message) { console_log(message, '[ERROR]', Colors.RED) }
 def warn(message) { console_log(message, '[WARNING]', Colors.GREEN) }
-def debug(message) { console_log(message, '[DEBUG]', Colors.YELLOW) }
-def dryRun(message) { console_log(message, '[DRYRUN]', Colors.YELLOW) }
+def debug(message) { console_log(message, '[DEBUG]', Colors.CYAN) }
+def dryRun(message) { console_log(message, '[DRYRUN]', Colors.CYAN) }
 
 def logStart(label) { debug("BEGIN ${label}") }
 def logEnd(label) { debug("END ${label}") }
@@ -158,7 +152,6 @@ def deploy(String appName, String tag) {
     return
   }
 
-  // NOTE: uncomment those lines when we take this pipeline in production
   // build job: 'Subtask_Openstack_Playbook',
   //   parameters: [
   //     [$class: 'StringParameterValue', name: 'INVENTORY', value: tag],
@@ -170,7 +163,7 @@ def deploy(String appName, String tag) {
 def validateSchema(String domain, String environment) {
   echo "validating ${domain} - ${state.id}"
   nodejs(nodeJSInstallationName: 'node12') {
-    dir("${env.WORKSPACE}/signalen") { sh "make validate-schema DOMAIN=${domain} ENVIRONMENT=${environment}" }
+    dir("${env.WORKSPACE}/signalen") { sh "make validate-local-schema DOMAIN=${domain} ENVIRONMENT=${environment}" }
   }
 }
 
@@ -238,6 +231,7 @@ def prepareJenkinsPipeline() {
       ],
       booleanParam(name: 'cleanBuild', description: 'Clean workspace before build', defaultValue: false),
       booleanParam(name: 'disableParallelBuilds', description: 'Disable parallel builds', defaultValue: false),
+      booleanParam(name: 'disableParallelDeployments', description: 'Disable parallel deployments', defaultValue: false),
       choice(
         description: 'by default all domain images are built and deployed',
         name: 'domain',
