@@ -4,41 +4,53 @@
 
 DEVELOPMENT = false
 
+// SIGNALEN_REPOSITORY = 'jpoppe/signalen'
+// SIGNALS_FRONTEND_REPOSITORY = 'jpoppe/signals-frontend'
+// GITHUB_CREDENTIALS_ID = '431d5971-5b08-46d8-b225-74368ee31ec0'
+// DOCKER_BUILD_ARG_REGISTRY_HOST = DOCKER_REGISTRY_HOST_SHORT
+// SLACK_NOTIFICATIONS_CHANNEL = '#jpoppe'
+
 SIGNALEN_REPOSITORY = 'Amsterdam/signalen'
 SIGNALS_FRONTEND_REPOSITORY = 'Amsterdam/signals-frontend'
 GITHUB_CREDENTIALS_ID = '5b5e63e2-8db7-48c7-8e14-41cbd10eeb4a'
+DOCKER_BUILD_ARG_REGISTRY_HOST = DOCKER_REGISTRY_HOST
+SLACK_NOTIFICATIONS_CHANNEL = '#jpoppe'
+// SLACK_NOTIFICATIONS_CHANNEL = '#ci-chanel'
 
 ENABLE_SLACK_NOTIFICATIONS = !DEVELOPMENT
 JENKINS_NODE = DEVELOPMENT ? 'master' : 'BS16 || BS17'
 DOCKER_REGISTRY_AUTH = DEVELOPMENT ? null : 'docker_registry_auth'
 
-ENVIRONMENT_MAP = [acceptance: 'acc', production: 'prod']
+INFO_HEADER = '''
+
+  ___(_) __ _ _ __   __ _| | ___ _ __    _ __ (_)_ __   ___| (_)_ __   ___
+ / __| |/ _` | '_ \\ / _` | |/ _ \\ '_ \\  | '_ \\| | '_ \\ / _ \\ | | '_ \\ / _ \\
+ \\__ \\ | (_| | | | | (_| | |  __/ | | | | |_) | | |_) |  __/ | | | | |  __/
+ |___/_|\\__, |_| |_|\\__,_|_|\\___|_| |_| | .__/|_| .__/ \\___|_|_|_| |_|\\___|
+        |___/                           |_|     |_|
+'''
+
+// -- Domains ---------------------------------------------------------------------------------------------------------
+
+DOMAINS = []
 
 // -- Workspaces ------------------------------------------------------------------------------------------------------
 
-state = [
-  id: '',
-  environment: '',
-  environmentShort: '',
-  domains: [],
-  workspaces: [
-    signalen: [
-      id: '',
-      gitRef: '',
-      commitRef: '',
-      name: 'signalen',
-      repository: SIGNALEN_REPOSITORY,
-      repositoryUrl: "https://github.com/${SIGNALEN_REPOSITORY}.git"
-    ],
-    signalsFrontend: [
-      id: '',
-      gitRef: '',
-      commitRef: '',
-      name: 'signals-frontend',
-      repository: SIGNALS_FRONTEND_REPOSITORY,
-      repositoryUrl: "https://github.com/${SIGNALS_FRONTEND_REPOSITORY}.git"
-    ],
-  ]
+WORKSPACES = [
+  signalen: [
+    currentGitRef: '',
+    gitRefParamName: 'SIGNALEN_TAG',
+    name: 'signalen',
+    repository: SIGNALEN_REPOSITORY,
+    repositoryUrl: "https://github.com/${SIGNALEN_REPOSITORY}.git"
+  ],
+  signalsFrontend: [
+    currentGitRef: '',
+    gitRefParamName: 'SIGNALS_FRONTEND_TAG',
+    name: 'signals-frontend',
+    repository: SIGNALS_FRONTEND_REPOSITORY,
+    repositoryUrl: "https://github.com/${SIGNALS_FRONTEND_REPOSITORY}.git"
+  ],
 ]
 
 // -- Section header styles -------------------------------------------------------------------------------------------
@@ -68,50 +80,40 @@ enum Colors {
   public String xterm_code
   public Colors(String xterm_code) { this.xterm_code = xterm_code }
 }
-
-def console_log(message, tag, color) { echo(String.format("%s%s %s%s", color.xterm_code, tag, message, '\u001B[0m')) }
-
-def info(message) { console_log(message, '[INFO]', Colors.PURPLE) }
-def error(message) { console_log(message, '[ERROR]', Colors.RED) }
-def warn(message) { console_log(message, '[WARNING]', Colors.GREEN) }
-def debug(message) { console_log(message, '[DEBUG]', Colors.CYAN) }
-
-def dryRun(message) { console_log(message, '[DRYRUN]', Colors.CYAN) }
-def workspaceInfo(workspace, message) { console_log(message, "[${workspace.name}]", Colors.PURPLE) }
-
-def logStart(label) { debug("BEGIN ${label}") }
-def logEnd(label) { debug("END ${label}") }
-
-def workspaceLastCommit(String workspace) {
-  dir("${env.WORKSPACE}/${workspace}") {
-    return "${workspace}_" + sh(returnStdout: true, script: 'git show --oneline --date=relative -s')
-  }
-}
+def log(message, color, tag) { echo(String.format("%s%s %s%s", color.xterm_code, tag, message, '\u001B[0m')) }
+def log(message, color) { echo(String.format("%s%s%s", color.xterm_code, message, '\u001B[0m')) }
+def log(message) { log(message, Colors.PURPLE) }
+def info(message) { log(message, Colors.PURPLE, '[INFO]') }
+def error(message) { log(message, Colors.RED, '[ERROR]') }
+def warn(message) { log(message, Colors.GREEN, '[WARNING]') }
+def dryRun(message) { log(message, Colors.CYAN, '[DRYRUN]') }
 
 // -- Helper functions ------------------------------------------------------------------------------------------------
 
 def checkoutWorkspace(workspace, String refName = 'origin/master') {
-  workspaceInfo(workspace, "checkout ref ${refName}")
+  log("[${workspace.name}] checkout Git ref: ${refName}")
 
-  return checkout([
+  checkout([
     $class: 'GitSCM',
     branches: [[name: refName]],
     extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: workspace.name]],
     userRemoteConfigs: [[credentialsId: GITHUB_CREDENTIALS_ID, url: workspace.repositoryUrl]]
   ])
+
+  dir("${env.WORKSPACE}/${workspace.name}") {
+    def lastGitCommitMessage = sh(returnStdout: true, script: 'git show --oneline --date=relative -s')
+    log("[${workspace.name}] last Git commit message: ${lastGitCommitMessage}")
+  }
 }
 
-String BRANCH = "${env.BRANCH_NAME}"
-
-Boolean IS_SEMVER_TAG = BRANCH ==~ /v(\d{1,3}\.){2}\d{1,3}/
-
 def tryStep(String message, Closure block, Closure tearDown = null) {
-  info("[step] ${message}")
   try {
     block()
   } catch (Throwable throwable) {
     if (ENABLE_SLACK_NOTIFICATIONS) {
-      slackSend message: "${env.JOB_NAME}: ${message} failure ${env.BUILD_URL}", channel: '#ci-channel', color: 'danger'
+      slackSend message: "${env.JOB_NAME}: ${message} failure ${env.BUILD_URL}",
+        channel: SLACK_NOTIFICATIONS_CHANNEL,
+        color: 'danger'
     } else {
       warn("slack notifications are disabled, message: ${message}")
     }
@@ -122,30 +124,45 @@ def tryStep(String message, Closure block, Closure tearDown = null) {
   }
 }
 
-def buildAndPush(String configuration, String dockerTag, String environment) {
-  if (params.dryRun) {
-    dryRun("buildAndPush - ${configuration} ${dockerTag} ${environment}")
-  } else {
-    docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_AUTH) {
-      def image = docker.build(
-        "ois/signals-${configuration}:${env.BUILD_NUMBER}",
-        "--build-arg DOCKER_REGISTRY=${DOCKER_REGISTRY_HOST} " +
-        '--shm-size 1G ' +
-        "--build-arg BUILD_ENV=${environment} " +
-        "${env.WORKSPACE}/signalen/domains/${configuration}"
-      )
+def buildAndPushDockerImage(String domain, String environment) {
+  if (params.DRY_RUN) {
+    dryRun("buildAndPushDockerImage - ${domain} ${environment}")
+    return
+  }
 
-      image.push()
-      image.push(dockerTag)
-    }
+  def environmentAbbreviations = [acceptance: 'acc', production: 'prod']
+
+  docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_AUTH) {
+    def image = docker.build(
+      "ois/signals-${domain}:${env.BUILD_NUMBER}", [
+        "--build-arg DOCKER_REGISTRY=${DOCKER_BUILD_ARG_REGISTRY_HOST} ",
+        '--shm-size 1G ',
+        "--build-arg BUILD_ENV=${environmentAbbreviations[environment]} ",
+        "${env.WORKSPACE}/signalen/domains/${domain}"
+      ].join(' ')
+    )
+
+    image.push()
+    image.push(environment)
   }
 }
 
-def deploy(String appName, String tag) {
-  info("deploying signals frontend: ${params.signalsFrontendRef} to ${appName}")
+def deployDomain(String domain, String tag) {
+  def appName = "app_signals-${domain}"
+
+  info("deploying domain: ${params.ENVIRONMENT} ${domain} ${tag} as ${appName}")
+
+  if (params.ENVIRONMENT == 'acceptance' && domain == 'weesp') {
+    // build job: 'Subtask_Openstack_Playbook',
+    //   parameters: [
+    //     [$class: 'StringParameterValue', name: 'INVENTORY', value: tag],
+    //     [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy.yml'],
+    //     [$class: 'StringParameterValue', name: 'PLAYBOOKPARAMS', value: "-e cmdb_id=${appName}"],
+    //   ]
+  }
 
   if (DEVELOPMENT) {
-    debug('deployment is skipped when DEVELOPMENT = true!')
+    info('deployment is skipped when DEVELOPMENT = true!')
     return
   }
 
@@ -158,188 +175,210 @@ def deploy(String appName, String tag) {
 }
 
 def validateSchema(String domain, String environment) {
-  echo "validating ${domain} - ${state.id}"
+  info("validating schema: ${domain} ${environment} ${SIGNALEN_TAG}+${SIGNALS_FRONTEND_TAG}")
+
   nodejs(nodeJSInstallationName: 'node12') {
     dir("${env.WORKSPACE}/signalen") { sh "make validate-local-schema DOMAIN=${domain} ENVIRONMENT=${environment}" }
   }
 }
 
 def prepareJenkinsPipeline() {
-  logStart('preparing `signalen` Jenkins pipeline')
+  log("Start preparing job ${env.BUILD_DISPLAY_NAME}", Colors.CYAN)
 
-  if (params.cleanBuild) {
-    info('cleaning workspaces')
+  if (params.CLEAN_WORKSPACE) {
+    info('cleaning workspace folders')
     cleanWs()
   }
 
-  state.workspaces.each { key, workspace -> checkoutWorkspace(workspace) }
-
-  state.domains = dir("${env.WORKSPACE}/signalen") { sh(returnStdout: true, script: 'make list-domains').split() }
+  WORKSPACES.each { key, workspace -> checkoutWorkspace(workspace) }
+  DOMAINS = dir("${env.WORKSPACE}/signalen") { sh(returnStdout: true, script: 'make list-domains').split() }
 
   properties([
     // uncomment the following line to enable GitHub WebHook triggers
     // pipelineTriggers([githubPush()]),
-    buildDiscarder(
-      logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')
-    ),
     durabilityHint('PERFORMANCE_OPTIMIZED'),
-    // [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
     parameters([
       [
         $class: 'ParameterSeparatorDefinition',
-        name: 'buildParametersHeader',
-        sectionHeader: 'Build',
+        name: '_BUILD_PARAMETERS_HEADER',
+        sectionHeader: 'Build parameters',
         separatorStyle: separatorStyle,
         sectionHeaderStyle: sectionHeaderStyle
       ],
-      choice(description: 'environment', name: 'environment', choices: ['acceptance', 'production']),
+      choice(description: 'deploy environment', name: 'ENVIRONMENT', choices: ['acceptance', 'production']),
       gitParameter(
-        description: 'signals-frontend repository tag or branch',
-        name: 'signalsFrontendRef',
+        name: 'SIGNALS_FRONTEND_TAG',
+        description: 'signals-frontend Git repository tag',
+        useRepository: 'signals-frontend',
         branch: '',
-        branchFilter: '.*',
+        tagFilter: 'v[0-9]*.[0-9]*.[0-9]*',
         defaultValue: 'origin/master',
+        branchFilter: '!*',
         quickFilterEnabled: false,
         selectedValue: 'TOP',
         sortMode: 'DESCENDING_SMART',
-        tagFilter: '*',
-        type: 'PT_BRANCH_TAG',
-        useRepository: 'signals-frontend'
+        type: 'PT_BRANCH_TAG'
       ),
       gitParameter(
-        name: 'signalenRef',
+        name: 'SIGNALEN_TAG',
+        description: 'signalen Git repository tag',
+        useRepository: 'signalen',
         branch: '',
-        branchFilter: '.*',
+        tagFilter: 'v[0-9]*.[0-9]*.[0-9]*',
         defaultValue: 'origin/master',
+        branchFilter: '!*',
         quickFilterEnabled: false,
         selectedValue: 'TOP',
         sortMode: 'DESCENDING_SMART',
-        tagFilter: '*',
-        type: 'PT_BRANCH_TAG',
-        description: 'signalen repository tag or branch',
-        useRepository: 'signalen'
+        type: 'PT_BRANCH_TAG'
       ),
+
       [
-        sectionHeaderStyle: sectionHeaderStyle,
-        name: 'debugParametersHeader',
-        sectionHeader: 'Debug/Testing/Maintenance',
+        $class: 'ParameterSeparatorDefinition',
+        name: '_ADDITIONAL_BUILD_PARAMETERS_HEADER',
+        sectionHeader: 'Additional build parameters',
         separatorStyle: separatorStyle,
-        $class: 'ParameterSeparatorDefinition'
+        sectionHeaderStyle: sectionHeaderStyle
       ],
-      booleanParam(name: 'cleanBuild', description: 'Clean workspace before build', defaultValue: false),
-      booleanParam(name: 'disableParallelBuilds', description: 'Disable parallel builds', defaultValue: false),
-      booleanParam(name: 'disableParallelDeployments', description: 'Disable parallel deployments', defaultValue: false),
+      booleanParam(
+        name: 'CLEAN_WORKSPACE',
+        description: 'clean workspace before the building process starts',
+        defaultValue: false
+      ),
       choice(
-        description: 'by default all domain images are built and deployed',
-        name: 'domain',
+        description: 'build and deploy a single domain instead of all domains',
+        name: 'DOMAIN',
         choices: ['', 'weesp', 'amsterdam', 'amsterdamsebos']
       ),
-      booleanParam(name: 'dryRun', description: 'Skip deployment and building', defaultValue: false)
+
+      [
+        $class: 'ParameterSeparatorDefinition',
+        name: '_DEBUG_AND_MAINTENANCE_PARAMETERS_HEADER',
+        sectionHeader: 'Debug and maintenance parameters',
+        separatorStyle: separatorStyle,
+        sectionHeaderStyle: sectionHeaderStyle
+      ],
+      booleanParam(name: 'DRY_RUN', description: 'skip building images and deployments', defaultValue: false),
+      booleanParam(name: 'DISABLE_PARALLEL_BUILDS', description: 'disable parallel builds', defaultValue: false),
+      booleanParam(
+        name: 'DISABLE_PARALLEL_DEPLOYMENTS',
+        description: 'disable parallel deployments',
+        defaultValue: false
+      )
     ])
   ])
 
-  logEnd('preparing `signalen` Jenkins pipeline')
+  log("Finished preparing job ${env.BUILD_DISPLAY_NAME}")
 }
 
 // -- Jenkins pipeline ------------------------------------------------------------------------------------------------
 
 ansiColor('xterm') {
   node(JENKINS_NODE) {
+    log(INFO_HEADER, Colors.CYAN)
+
     prepareJenkinsPipeline()
 
-    message = [
-      '',
-      '***********************************************',
-      "Running pipeline with parameters",
-      '***********************************************',
-      "environment = ${params.environment}",
-      '',
-      "signalenRef = ${params.signalenRef}",
-      "signalsFrontendRef = ${params.signalsFrontendRef}",
-      '***********************************************',
-      ''
-    ]
+    if (params.DOMAIN) DOMAINS = [params.DOMAIN]
 
-    info('pipeline info' + message.join('\n'))
+    log("starting build ${env.BUILD_DISPLAY_NAME}")
+    log('***********************************************')
 
-    stage('Prepare workspaces and initialize state') {
-      info("initializing ${state.workspaces.size()} workspaces")
+    log(
+      [
+        "BUILD_TAG = ${env.BUILD_TAG}",
+        "DOMAINS = ${DOMAINS}",
+        "DOCKER_REGISTRY_HOST = ${DOCKER_REGISTRY_HOST}",
+        "DOCKER_BUILD_ARG_REGISTRY_HOST = ${DOCKER_BUILD_ARG_REGISTRY_HOST}"
+      ].join('\n'),
+      Colors.CYAN
+    )
 
-      if (params.domain) state.domains = [params.domain]
+    params.each {key, value -> if (!key.startsWith('_')) log("${key}=${value}", Colors.CYAN) }
 
-      state.environment = params.environment
-      state.environmentShort = ENVIRONMENT_MAP[params.environment]
+    log('***********************************************')
 
-      debug("before - ${workspaceLastCommit('signals-frontend')}")
+    stage('Prepare workspaces') {
+      log("[STEP] Prepare workspaces: ${WORKSPACES.keySet().join(', ')}")
 
-      def stateIds = []
-
-      state.workspaces.each { key, workspace ->
-        workspace.gitRef = params["${key}Ref"]
-
-        def checkoutResult = checkoutWorkspace(workspace, workspace.gitRef)
-        workspace.commitRef = checkoutResult.GIT_COMMIT
-
-        workspace.id = "${workspace.name}_${workspace.gitRef}-${workspace.commitRef[0..7]}"
-
-        stateIds.push(workspace.id)
-      }
-
-      debug("after - ${workspaceLastCommit('signals-frontend')}")
-
-      state.id = "${state.environment}_${stateIds.join('+')}"
-    }
-
-    stage('Validate configuration schema(\'s)') {
-      def steps = [:]
-      state.domains.each { domain -> steps[domain] = { validateSchema domain, state.environment } }
-      parallel steps
-    }
-
-    stage('Build and push signals-frontend image') {
-      tryStep "build signals-frontend image", {
-        def workspace = state.workspaces.signalsFrontend
-
-        info("build image: ${workspace.id} ${workspace.commitRef}")
-        debug("${workspaceLastCommit('signals-frontend')}")
-
-        if (params.dryRun) {
-          dryRun('build signals-frontend image')
-        } else {
-          docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_AUTH) {
-            // TODO: is this needed?
-            // def cachedImage = docker.image("ois/signalsfrontend:latest")
-            // if (cachedImage) { cachedImage.pull() }
-
-            def buildParams = "--shm-size 1G " + "--build-arg BUILD_NUMBER=${env.BUILD_NUMBER} "
-            buildParams += IS_SEMVER_TAG ? "--build-arg GIT_BRANCH=${BRANCH} " : ''
-            buildParams += './signals-frontend'
-
-            def image = docker.build("ois/signalsfrontend:${env.BUILD_NUMBER}", buildParams)
-            image.push()
-            image.push('latest')
-          }
+      tryStep "PREPARE_WORKSPACES", {
+        WORKSPACES.each { key, workspace ->
+          workspace.currentGitRef = params[workspace.gitRefParamName]
+          checkoutWorkspace(workspace, workspace.currentGitRef)
         }
       }
     }
 
-    stage("Build and push domain image(s)") {
-      if (params.disableParallelBuilds) {
-        state.domains.each { domain -> buildAndPush(domain, params.environment, environment) }
-      } else {
+    stage('Validate schema\'s') {
+      log("[STEP] Validate ${params.ENVIRONMENT} schema's: ${DOMAINS.join(', ')}")
+
+      tryStep "VALIDATE_SCHEMAS", {
         def steps = [:]
-        state.domains.each { domain ->
-          steps[domain] = { buildAndPush domain, state.environment, state.environmentShort }
+
+        DOMAINS.each {domain -> steps["VALIDATE_SCHEMA_${domain}_${params.ENVIRONMENT}".toUpperCase()] = {
+          validateSchema domain, params.ENVIRONMENT }
         }
+
         parallel steps
       }
     }
 
-    stage('Deploy signals-frontend domain(s)') {
-      tryStep 'deploy signals-frontend domain(s)', {
-        deploy("app_signals-${params.domain}", params.environment)
+    stage('Build signals-frontend image') {
+      def workspace = WORKSPACES.signalsFrontend
+
+      log("[STEP] build signals-frontend image: ${workspace.name} ${workspace.currentGitRef}")
+
+      tryStep 'BUILD_SIGNALS_FRONTEND_IMAGE', {
+        if (params.DRY_RUN) {
+          dryRun("build signals-frontend image ${params.SIGNALS_FRONTEND_TAG}")
+          return
+        }
+
+        docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_AUTH) {
+          def image = docker.build(
+            "ois/signalsfrontend:${env.BUILD_NUMBER}", [
+              '--shm-size 1G',
+              "--build-arg BUILD_NUMBER=${env.BUILD_NUMBER}",
+              "--build-arg GIT_BRANCH=${params.SIGNALS_FRONTEND_TAG}",
+              "${env.WORKSPACE}/signals-frontend"
+            ].join(' ')
+          )
+
+          image.push()
+          image.push('latest')
+        }
+      }
+    }
+
+    stage("Build domain images") {
+      if (params.DISABLE_PARALLEL_BUILDS) {
+        DOMAINS.each { domain -> buildAndPushDockerImage(domain, params.ENVIRONMENT) }
+        return
+      }
+
+      tryStep 'BUILD_DOMAIN_IMAGES', {
+        def steps = [:]
+
+        DOMAINS.each {domain -> steps["BUILD_DOMAIN_IMAGE_${domain}_${params.ENVIRONMENT}".toUpperCase()] = {
+          buildAndPushDockerImage domain, params.ENVIRONMENT
+        }}
+
+        parallel steps
+      }
+    }
+
+    stage('Deploy domains') {
+      log("[STEP] deploy domains: ${DOMAINS.join(', ')} to ${params.ENVIRONMENT}")
+
+      tryStep 'DEPLOY_DOMAINS', {
+        def steps = [:]
+
+        DOMAINS.each {domain -> steps["DEPLOY_DOMAIN_${domain}_${params.ENVIRONMENT}".toUpperCase()] = {
+          deployDomain domain, params.ENVIRONMENT
+        }}
+
+        parallel steps
       }
     }
   }
-
 }
