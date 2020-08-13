@@ -152,26 +152,21 @@ def deployDomain(String domain, String tag) {
 
   info("deploying domain: ${params.ENVIRONMENT} ${domain} ${tag} as ${appName}")
 
-  if (params.ENVIRONMENT == 'acceptance' && domain == 'weesp') {
+  if (DEVELOPMENT) {
+    info('deployment is skipped when DEVELOPMENT = true!')
+    return
+  }
+
+  if (params.ENVIRONMENT == 'acceptance') {
     build job: 'Subtask_Openstack_Playbook',
       parameters: [
         [$class: 'StringParameterValue', name: 'INVENTORY', value: tag],
         [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy.yml'],
         [$class: 'StringParameterValue', name: 'PLAYBOOKPARAMS', value: "-e cmdb_id=${appName}"],
       ]
+  } else {
+    warn("for safety only the 'acceptance' is allowed to deploy")
   }
-
-  if (DEVELOPMENT) {
-    info('deployment is skipped when DEVELOPMENT = true!')
-    return
-  }
-
-  // build job: 'Subtask_Openstack_Playbook',
-  //   parameters: [
-  //     [$class: 'StringParameterValue', name: 'INVENTORY', value: tag],
-  //     [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy.yml'],
-  //     [$class: 'StringParameterValue', name: 'PLAYBOOKPARAMS', value: "-e cmdb_id=${appName}"],
-  //   ]
 }
 
 def validateSchema(String domain, String environment) {
