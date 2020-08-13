@@ -153,12 +153,12 @@ def deployDomain(String domain, String tag) {
   info("deploying domain: ${params.ENVIRONMENT} ${domain} ${tag} as ${appName}")
 
   if (params.ENVIRONMENT == 'acceptance' && domain == 'weesp') {
-    // build job: 'Subtask_Openstack_Playbook',
-    //   parameters: [
-    //     [$class: 'StringParameterValue', name: 'INVENTORY', value: tag],
-    //     [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy.yml'],
-    //     [$class: 'StringParameterValue', name: 'PLAYBOOKPARAMS', value: "-e cmdb_id=${appName}"],
-    //   ]
+    build job: 'Subtask_Openstack_Playbook',
+      parameters: [
+        [$class: 'StringParameterValue', name: 'INVENTORY', value: tag],
+        [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy.yml'],
+        [$class: 'StringParameterValue', name: 'PLAYBOOKPARAMS', value: "-e cmdb_id=${appName}"],
+      ]
   }
 
   if (DEVELOPMENT) {
@@ -326,7 +326,7 @@ ansiColor('xterm') {
     stage('Build signals-frontend image') {
       def workspace = WORKSPACES.signalsFrontend
 
-      log("[STEP] build signals-frontend image: ${workspace.name} ${workspace.currentGitRef}")
+      log("[STEP] build signals-frontend ${params.ENVIRONMENT_MAP} image: ${workspace.currentGitRef}")
 
       tryStep 'BUILD_SIGNALS_FRONTEND_IMAGE', {
         if (params.DRY_RUN) {
