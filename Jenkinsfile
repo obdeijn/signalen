@@ -321,7 +321,7 @@ ansiColor('xterm') {
     stage('Build signals-frontend image') {
       def workspace = WORKSPACES.signalsFrontend
 
-      log("[STEP] build signals-frontend ${params.ENVIRONMENT_MAP} image: ${workspace.currentGitRef}")
+      log("[STEP] build signals-frontend ${params.ENVIRONMENT} image: ${workspace.currentGitRef}")
 
       tryStep 'BUILD_SIGNALS_FRONTEND_IMAGE', {
         if (params.DRY_RUN) {
