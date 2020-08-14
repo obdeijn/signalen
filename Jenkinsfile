@@ -90,22 +90,6 @@ def dryRun(message) { log(message, Colors.CYAN, '[DRYRUN]') }
 
 // -- Helper functions ------------------------------------------------------------------------------------------------
 
-def checkoutWorkspace(workspace, String refName = 'origin/master') {
-  log("[${workspace.name}] checkout Git ref: ${refName}")
-
-  checkout([
-    $class: 'GitSCM',
-    branches: [[name: refName]],
-    extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: workspace.name]],
-    userRemoteConfigs: [[credentialsId: GITHUB_CREDENTIALS_ID, url: workspace.repositoryUrl]]
-  ])
-
-  dir("${env.WORKSPACE}/${workspace.name}") {
-    def lastGitCommitMessage = sh(returnStdout: true, script: 'git show --oneline --date=relative -s')
-    log("[${workspace.name}] last Git commit message: ${lastGitCommitMessage}")
-  }
-}
-
 def tryStep(String message, Closure block, Closure tearDown = null) {
   try {
     block()
@@ -121,6 +105,22 @@ def tryStep(String message, Closure block, Closure tearDown = null) {
     throw throwable
   } finally {
     if (tearDown) tearDown()
+  }
+}
+
+def checkoutWorkspace(workspace, String refName = 'origin/master') {
+  log("[${workspace.name}] checkout Git ref: ${refName}")
+
+  checkout([
+    $class: 'GitSCM',
+    branches: [[name: refName]],
+    extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: workspace.name]],
+    userRemoteConfigs: [[credentialsId: GITHUB_CREDENTIALS_ID, url: workspace.repositoryUrl]]
+  ])
+
+  dir("${env.WORKSPACE}/${workspace.name}") {
+    def lastGitCommitMessage = sh(returnStdout: true, script: 'git show --oneline --date=relative -s')
+    log("[${workspace.name}] last Git commit message: ${lastGitCommitMessage}")
   }
 }
 
@@ -152,11 +152,6 @@ def deployDomain(String domain, String tag) {
 
   info("deploying domain: ${params.ENVIRONMENT} ${domain} ${tag} as ${appName}")
 
-  if (DEVELOPMENT) {
-    info('deployment is skipped when DEVELOPMENT = true!')
-    return
-  }
-
   if (params.ENVIRONMENT == 'acceptance') {
     build job: 'Subtask_Openstack_Playbook',
       parameters: [
@@ -177,6 +172,8 @@ def validateSchema(String domain, String environment) {
   }
 }
 
+// -- Jenkins pipeline pre configuration ------------------------------------------------------------------------------
+
 def prepareJenkinsPipeline() {
   log("Start preparing job ${env.BUILD_DISPLAY_NAME}", Colors.CYAN)
 
@@ -189,7 +186,7 @@ def prepareJenkinsPipeline() {
   DOMAINS = dir("${env.WORKSPACE}/signalen") { sh(returnStdout: true, script: 'make list-domains').split() }
 
   properties([
-    // uncomment the following line to enable GitHub WebHook triggers
+    // uncomment the following line to trigger builds by GitHub WebHook triggers
     // pipelineTriggers([githubPush()]),
     durabilityHint('PERFORMANCE_OPTIMIZED'),
     parameters([
@@ -346,12 +343,12 @@ ansiColor('xterm') {
     }
 
     stage("Build domain images") {
-      if (params.DISABLE_PARALLEL_BUILDS) {
-        DOMAINS.each { domain -> buildAndPushDockerImage(domain, params.ENVIRONMENT) }
-        return
-      }
-
       tryStep 'BUILD_DOMAIN_IMAGES', {
+        if (params.DISABLE_PARALLEL_BUILDS) {
+          DOMAINS.each { domain -> buildAndPushDockerImage(domain, params.ENVIRONMENT) }
+          return
+        }
+
         def steps = [:]
 
         DOMAINS.each {domain -> steps["BUILD_DOMAIN_IMAGE_${domain}_${params.ENVIRONMENT}".toUpperCase()] = {
@@ -366,6 +363,11 @@ ansiColor('xterm') {
       log("[STEP] deploy domains: ${DOMAINS.join(', ')} to ${params.ENVIRONMENT}")
 
       tryStep 'DEPLOY_DOMAINS', {
+        if (params.DISABLE_PARALLEL_DEPLOYMENTS) {
+          DOMAINS.each { domain -> deployDomain(domain, params.ENVIRONMENT) }
+          return
+        }
+
         def steps = [:]
 
         DOMAINS.each {domain -> steps["DEPLOY_DOMAIN_${domain}_${params.ENVIRONMENT}".toUpperCase()] = {
