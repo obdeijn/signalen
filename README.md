@@ -1,23 +1,29 @@
 # Signalen mono repo
 
+## Makefile
 
+The Makefile in this repository is used to support Jenkins and running local Docker environments with `docker-compose`, besides that it also does schema validation.
 
-## Build and run different configurations in docker-compose
-
-
-- Create the docker image of the signals-frontend. Use the environment var BUILD_PATH to override the default path of
-  the signals-frontend project (../signals-frontend)
+Type `make` to list available targets (commands).
 
 ```bash
-make build-base # BUILD_PATH=../signals_frontend
+make
+Help (master_db2263d)
+
+build                          build Docker Compose images
+download-schema                download JSON validation schema definition to /tmp
+help                           show this help screen
+images                         list Docker Compose images
+info                           dump various variables to screen
+list-domains                   list frontend domains
+logs                           tail Docker Compose container logs
+rebuild                        rebuild Docker Compose
+restart                        restart Docker Compose
+shell                          execute command on container. Usage `make shell ${ENVIRONMENT}`
+start                          start single Docker Compose service. Usage `make start-domain DOMAIN=amsterdam`
+status                         show Docker Compose process list
+stop                           stop Docker Compose
+validate-all-schemas           validate all domain JSON schema configuration files. Usage `make SCHEMA_DEFINITION_GIT_REF=master validate-all-schemas`
+validate-local-schema          validate configuration schema in current branch. Usage `make BUILD_PATH=../signals-frontend DOMAIN=amsterdam ENVIRONMENT=development validate-schema`
+validate-schema                validate single domain schema configuration file. Usage `make DOMAIN=amsterdam ENVIRONMENT=development SCHEMA_DEFINITION_GIT_REF=master validate-schema`
 ```
-
-- Validate the json schemas `make validate-schemas`
-- Spin up one of the configurations. Each of them run on localhost:3001
-
-```bash
-make amsterdam
-make amsterdamsebos
-make weesp
-```
-
