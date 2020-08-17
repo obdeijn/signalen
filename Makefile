@@ -38,34 +38,23 @@ define validate_schema =
 	echo;
 endef
 
+_MAKEFILE_BUILTIN_VARIABLES := .DEFAULT_GOAL CURDIR MAKEFLAGS MAKEFILE_LIST SHELL
+
+_MAKEFILE_VARIABLES := $(foreach make_variable, $(sort $(.VARIABLES)),\
+	$(if $(filter-out _% HELP_FUN $(_MAKEFILE_BUILTIN_VARIABLES),$(make_variable)),\
+		$(if $(filter file,$(origin $(make_variable))),\
+			"\n$(make_variable)=$($(make_variable))"\
+		)\
+	)\
+)
+
 help: ## show this help screen
 	@echo -e "Help (${SIGNALEN_GIT_REF})"
 	@echo
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 info: ## dump various variables to screen
-	@echo -----------------
-	@echo DOMAINS=${DOMAINS}
-	@echo ENVIRONMENTS=${ENVIRONMENTS}
-	@echo SCHEMA_DEFINITION_TEMP_FILE=${SCHEMA_DEFINITION_TEMP_FILE}
-	@echo -----------------
-	@echo
-	@echo arguments
-	@echo ---------
-	@echo
-	@echo BUILD_PATH=${BUILD_PATH}
-	@echo ENVIRONMENT=${ENVIRONMENT}
-	@echo SCHEMA_DEFINITION_TEMP_FILE=${SCHEMA_DEFINITION_TEMP_FILE}
-	@echo REPOSITORY_OWNER=${REPOSITORY_OWNER}
-	@echo FRONTEND_REPOSITORY_NAME=${FRONTEND_REPOSITORY_NAME}
-	@echo SCHEMA_DEFINITION_GIT_REF=${SCHEMA_DEFINITION_GIT_REF}
-	@echo DOMAIN=${DOMAIN}
-	@echo DOCKER_REGISTRY=${DOCKER_REGISTRY}
-
-# images
-# BASE_IMAGE := signalsfrontend
-# FRONTEND_IMAGE := ${DOCKER_REGISTRY}/${BASE_IMAGE}:${IMAGE_TAG}
-# WEESP_IMAGE := ${DOCKER_REGISTRY}/signals-weesp_web-container:${IMAGE_TAG}
+	@echo -e $(_MAKEFILE_VARIABLES)
 
 build: ## build Docker Compose images
 	docker-compose build --parallel
@@ -116,41 +105,3 @@ validate-all-schemas: download-schema ## validate all domain JSON schema configu
 
 validate-schema: download-schema ## validate single domain schema configuration file. Usage `make DOMAIN=amsterdam ENVIRONMENT=development SCHEMA_DEFINITION_GIT_REF=master validate-schema`
 	$(call validate_schema,$(SCHEMA_DEFINITION_TEMP_FILE),$(DOMAIN),$(SCHEMA_ENVIRONMENT))
-
-docker-list: ## list docker processes, containers, images, volumes and networks
-	@docker ps
-	@echo
-	@docker container ls --all
-	@echo
-	@docker images --all
-	@echo
-	@docker volume ls
-	@echo
-	@docker network ls
-
-docker-prune: ## remove stopped docker containers, unused volumes and images and networks
-	docker system prune --all --volumes
-
-docker-registry-garbage-collector-dry-run: ## run Docker garbage collector
-	docker exec registry bin/registry garbage-collect --dry-run=true /etc/docker/registry/config.yml
-
-docker-registry-garbage-collector: ## run Docker garbage collector
-	docker exec registry bin/registry garbage-collect /etc/docker/registry/config.yml
-
-docker-registry-shell: ## execute command on container. Usage `make shell ${ENVIRONMENT}`
-	docker exec -it registry sh
-
-docker-registry-list-repositories: ## list local docker registry categories
-ifneq (, $(shell which jq))
-	@wget -q http://localhost:5000/v2/_catalog -O - | jq '.repositories'
-else
-	@wget -q http://localhost:5000/v2/_catalog -O -
-endif
-
-docker-registry-list-tags: ## list local docker registry categories
-	wget http://localhost:5000/v2/ois/signals-amsterdam/tags/list -q -O - | jq
-
-docker-registry-list-tag-manifest: ## list local docker registry categories
-	# wget -q --header="Accept: application/vnd.docker.distribution.manifest.v2+json" http://localhost:5000/v2/ois/signals-amsterdam/manifests/acceptance -O - | grep Docker-Content-Digest | cut -d' ' -f3
-	curl -v --silent -H "Accept: application/vnd.docker.distribution.manifest.v2+json" -X GET http://localhost:5000/v2/ois/signals-amsterdam/manifests/acceptance 2>&1 | grep Docker-Content-Digest | cut -d' ' -f3
-
