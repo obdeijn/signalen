@@ -1,4 +1,8 @@
-FROM docker-registry.data.amsterdam.nl/ois/signalsfrontend:latest
+ARG DOCKER_REGISTRY=docker-registry.data.amsterdam.nl
+ARG DOCKER_REGISTRY_PATH=/ois/
+ARG DOCKER_IMAGE=signalsfrontend
+ARG DOCKER_IMAGE_TAG=latest
+FROM ${DOCKER_REGISTRY}${DOCKER_REGISTRY_PATH}${DOCKER_IMAGE}:${DOCKER_IMAGE_TAG}
 
 ARG BUILD_ENV=prod
 
