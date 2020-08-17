@@ -4,12 +4,6 @@
 
 DEVELOPMENT = false
 
-// SIGNALEN_REPOSITORY = 'jpoppe/signalen'
-// SIGNALS_FRONTEND_REPOSITORY = 'jpoppe/signals-frontend'
-// GITHUB_CREDENTIALS_ID = '431d5971-5b08-46d8-b225-74368ee31ec0'
-// DOCKER_BUILD_ARG_REGISTRY_HOST = DOCKER_REGISTRY_HOST_SHORT
-// SLACK_NOTIFICATIONS_CHANNEL = '#jpoppe'
-
 SIGNALEN_REPOSITORY = 'Amsterdam/signalen'
 SIGNALS_FRONTEND_REPOSITORY = 'Amsterdam/signals-frontend'
 GITHUB_CREDENTIALS_ID = '5b5e63e2-8db7-48c7-8e14-41cbd10eeb4a'
@@ -86,7 +80,6 @@ def log(message) { log(message, Colors.PURPLE) }
 def info(message) { log(message, Colors.PURPLE, '[INFO]') }
 def error(message) { log(message, Colors.RED, '[ERROR]') }
 def warn(message) { log(message, Colors.GREEN, '[WARNING]') }
-def dryRun(message) { log(message, Colors.CYAN, '[DRYRUN]') }
 
 // -- Helper functions ------------------------------------------------------------------------------------------------
 
@@ -125,11 +118,6 @@ def checkoutWorkspace(workspace, String refName = 'origin/master') {
 }
 
 def buildAndPushDockerImage(String domain, String environment) {
-  if (params.DRY_RUN) {
-    dryRun("buildAndPushDockerImage - ${domain} ${environment}")
-    return
-  }
-
   def environmentAbbreviations = [acceptance: 'acc', production: 'prod']
 
   docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_AUTH) {
@@ -321,11 +309,6 @@ ansiColor('xterm') {
       log("[STEP] build signals-frontend ${params.ENVIRONMENT} image: ${workspace.currentGitRef}")
 
       tryStep 'BUILD_SIGNALS_FRONTEND_IMAGE', {
-        if (params.DRY_RUN) {
-          dryRun("build signals-frontend image ${params.SIGNALS_FRONTEND_TAG}")
-          return
-        }
-
         docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_AUTH) {
           def image = docker.build(
             "ois/signalsfrontend:${env.BUILD_NUMBER}", [
