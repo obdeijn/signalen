@@ -10,20 +10,19 @@ CONFIGURATION_SCHEMA_ENVIRONMENTS := acc prod
 CONFIGURATION_SCHEMA_FILE := environment.conf.schema.json
 
 # globals which can be overriden by setting make variables on the CLI
-BUILD_PATH ?= ../signals-frontend
-ENVIRONMENT ?= development
-REPOSITORY_OWNER ?= Amsterdam
-FRONTEND_REPOSITORY_NAME ?= signals-frontend
 DOMAIN ?= amsterdam
-DOCKER_REGISTRY ?= docker-registry.data.amsterdam.nl/ois
+SIGNALS_FRONTEND_PATH ?= ../signals-frontend
+ENVIRONMENT ?= development
+GITHUB_REPOSITORY_OWNER ?= Amsterdam
+SIGNALS_FRONTEND_REPOSITORY_NAME ?= signals-frontend
 IMAGE_TAG ?= latest
 SCHEMA_DEFINITION_GIT_REF ?= master
 
 # dynamic globals
 DOMAINS := $(subst /,,$(subst ./domains/,,$(dir $(wildcard ./domains/*/))))
-SIGNALEN_GIT_REF := $(shell git branch -v | grep \* | cut -d ' ' -f2,3 --output-delimiter='_')
+SIGNALEN_GIT_REF := $(shell git rev-parse HEAD)
 SCHEMA_DEFINITION_TEMP_FILE := /tmp/signalen-configuration-schema.$(SIGNALEN_GIT_REF).json
-SCHEMA_DEFINITION_FILE := ${BUILD_PATH}/internals/schemas/${CONFIGURATION_SCHEMA_FILE}
+SCHEMA_DEFINITION_FILE := ${SIGNALS_FRONTEND_PATH}/internals/schemas/${CONFIGURATION_SCHEMA_FILE}
 
 ifeq ($(ENVIRONMENT),acceptance)
 SCHEMA_ENVIRONMENT := acc
@@ -49,11 +48,11 @@ _MAKEFILE_VARIABLES := $(foreach make_variable, $(sort $(.VARIABLES)),\
 )
 
 help: ## show this help screen
-	@echo -e "Help (${SIGNALEN_GIT_REF})"
+	@echo -e "signalen Makefile help (${SIGNALEN_GIT_REF})"
 	@echo
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-info: ## dump various variables to screen
+info: ## dump Makefile variables to screen
 	@echo -e $(_MAKEFILE_VARIABLES)
 
 build: ## build Docker Compose images
@@ -62,10 +61,8 @@ build: ## build Docker Compose images
 list-domains: ## list frontend domains
 	@echo ${DOMAINS}
 
-start: ## start single Docker Compose service. Usage `make start-domain DOMAIN=amsterdam`
+start: ## start single Docker Compose service. Usage `make DOMAIN=amsterdam start-domain`
 	docker-compose up --remove-orphans ${DOMAIN}
-	@echo
-	@docker-compose ps
 
 stop: ## stop Docker Compose
 	docker-compose down -v --remove-orphans
@@ -78,21 +75,22 @@ restart: stop start status ## restart Docker Compose
 status: ## show Docker Compose process list
 	docker-compose ps
 
-rebuild: stop build start status ## rebuild Docker Compose
+rebuild: stop build start status ## rebuild Docker Compose. Usage: `make DOMAIN=amsterdam rebuild`
 
-shell: ## execute command on container. Usage `make shell ${ENVIRONMENT}`
+shell: ## execute command on container. Usage `make ENVIRONMENT=development shell`
 	docker-compose exec ${DOMAIN} sh
 
 logs: ## tail Docker Compose container logs
 	docker-compose logs --tail=100 -f ${DOMAIN}
 
-validate-local-schema: ## validate configuration schema in current branch. Usage `make BUILD_PATH=../signals-frontend DOMAIN=amsterdam ENVIRONMENT=development validate-schema`
+validate-local-schema: ## validate configuration schema in current branch. Usage `make SIGNALS_FRONTEND_PATH=../signals-frontend DOMAIN=amsterdam ENVIRONMENT=development validate-local-schema`
 	@$(call validate_schema,$(SCHEMA_DEFINITION_FILE),$(DOMAIN),$(SCHEMA_ENVIRONMENT))
 
 download-schema: ## download JSON validation schema definition to /tmp
 ifeq ("$(wildcard $(SCHEMA_DEFINITION_TEMP_FILE))","")
-	wget --no-clobber \
-		--quiet https://github.com/Amsterdam/signals-frontend/raw/${SCHEMA_DEFINITION_GIT_REF}/internals/schemas/${CONFIGURATION_SCHEMA_FILE} \
+	@echo downloading schema from ${SIGNALS_FRONTEND_REPOSITORY_NAME} ${SCHEMA_ENVIRONMENT} to ${SCHEMA_DEFINITION_TEMP_FILE}
+	@wget --no-clobber \
+		--quiet https://github.com/${GITHUB_REPOSITORY_OWNER}/${SIGNALS_FRONTEND_REPOSITORY_NAME}/raw/${SCHEMA_DEFINITION_GIT_REF}/internals/schemas/${CONFIGURATION_SCHEMA_FILE} \
 		-O ${SCHEMA_DEFINITION_TEMP_FILE}
 endif
 
