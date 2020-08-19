@@ -72,7 +72,7 @@ def sendSlackMessage(String message, String prefix, String slackColor) {
   String slackMessage = "[${prefix}] ${env.JOB_NAME} - stage '${env.STAGE_NAME}': ${message} ${env.BUILD_URL}"
 
   if (ENABLE_SLACK_NOTIFICATIONS) {
-    slackSend message: slackMessage, channel: SLACK_NOTIFICATIONS_CHANNEL, color: color
+    slackSend message: slackMessage, channel: SLACK_NOTIFICATIONS_CHANNEL, color: slackColor
     return
   }
 
