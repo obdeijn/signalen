@@ -153,7 +153,15 @@ def validateSchema(String domain, String environment) {
   info("validating schema: ${domain} ${environment} ${SIGNALEN_TAG}+${SIGNALS_FRONTEND_TAG}")
 
   nodejs(nodeJSInstallationName: 'node12') {
-    dir("${env.WORKSPACE}/signalen") { sh "make validate-local-schema DOMAIN=${domain} ENVIRONMENT=${environment}" }
+    dir("${env.WORKSPACE}/signalen") {
+      try {
+        sh "make validate-local-schema DOMAIN=${domain} ENVIRONMENT=${environment}"
+      } catch (Throwable throwable) {
+        error("schema validation failed: ${domain} ${environment}")
+        throw throwable
+      }
+
+    }
   }
 }
 
@@ -292,15 +300,16 @@ ansiColor('xterm') {
     stage('Validate schema\'s') {
       log("[STEP] Validate ${params.ENVIRONMENT} schema's: ${DOMAINS.join(', ')}")
 
-        def steps = [:]
-        DOMAINS.each {domain -> steps["VALIDATE_SCHEMA_${domain}_${params.ENVIRONMENT}".toUpperCase()] = {
-          tryStep "VALIDATE_SCHEMA_${domain}", {
-            validateSchema domain, params.ENVIRONMENT
-          }
-        }
+        DOMAINS.each { domain -> validateSchema(domain, params.ENVIRONMENT) }
 
-        parallel steps
-      }
+        // def steps = [:]
+        // DOMAINS.each {domain ->  {
+        //   // tryStep "VALIDATE_SCHEMA_${domain}", {
+        //     validateSchema domain, params.ENVIRONMENT
+        //   // }
+        // }}
+
+        // parallel steps
     }
 
     stage('Build signals-frontend image') {
