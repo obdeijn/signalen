@@ -141,14 +141,14 @@ def deployDomain(String domain, String tag) {
   info("deploying domain: ${params.ENVIRONMENT} ${domain} ${tag} as ${appName}")
 
   if (params.ENVIRONMENT == 'acceptance') {
-    build job: 'Subtask_Openstack_Playbook',
-      parameters: [
-        [$class: 'StringParameterValue', name: 'INVENTORY', value: tag],
-        [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy.yml'],
-        [$class: 'StringParameterValue', name: 'PLAYBOOKPARAMS', value: "-e cmdb_id=${appName}"],
-      ]
+    // build job: 'Subtask_Openstack_Playbook',
+    //   parameters: [
+    //     [$class: 'StringParameterValue', name: 'INVENTORY', value: tag],
+    //     [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy.yml'],
+    //     [$class: 'StringParameterValue', name: 'PLAYBOOKPARAMS', value: "-e cmdb_id=${appName}"],
+    //   ]
   } else {
-    warn("for safety only the 'acceptance' is allowed to deploy")
+    warn("safety first - only 'acceptance' environmnet is allowed to deploy until pipeline is in production")
   }
 }
 
@@ -327,18 +327,19 @@ ansiColor('xterm') {
 
     stage("Build domain images") {
       tryStep 'BUILD_DOMAIN_IMAGES', {
-        if (params.DISABLE_PARALLEL_BUILDS) {
-          DOMAINS.each { domain -> buildAndPushDockerImage(domain, params.ENVIRONMENT) }
-          return
-        }
+        info('disabled for testing')
+        // if (params.DISABLE_PARALLEL_BUILDS) {
+        //   DOMAINS.each { domain -> buildAndPushDockerImage(domain, params.ENVIRONMENT) }
+        //   return
+        // }
 
-        def steps = [:]
+        // def steps = [:]
 
-        DOMAINS.each {domain -> steps["BUILD_DOMAIN_IMAGE_${domain}_${params.ENVIRONMENT}".toUpperCase()] = {
-          buildAndPushDockerImage domain, params.ENVIRONMENT
-        }}
+        // DOMAINS.each {domain -> steps["BUILD_DOMAIN_IMAGE_${domain}_${params.ENVIRONMENT}".toUpperCase()] = {
+        //   buildAndPushDockerImage domain, params.ENVIRONMENT
+        // }}
 
-        parallel steps
+        // parallel steps
       }
     }
 
