@@ -150,6 +150,8 @@ def deployDomain(String domain, String tag) {
 }
 
 def validateSchema(String domain, String environment) {
+  sh 'false'
+
   info("validating schema: ${domain} ${environment} ${SIGNALEN_TAG}+${SIGNALS_FRONTEND_TAG}")
 
   nodejs(nodeJSInstallationName: 'node12') {
@@ -299,8 +301,6 @@ ansiColor('xterm') {
 
     stage('Validate schema\'s') {
       log("[STEP] Validate ${params.ENVIRONMENT} schema's: ${DOMAINS.join(', ')}")
-
-      sh 'false'
 
       DOMAINS.each { domain -> validateSchema(domain, params.ENVIRONMENT) }
 
