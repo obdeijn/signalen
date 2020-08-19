@@ -282,6 +282,8 @@ def prepareJenkinsPipeline() {
 
 ansiColor('xterm') {
   node(JENKINS_NODE) {
+    notify("start release - signalen: ${params.SIGNALEN_TAG}, signals-frontend: ${params.SIGNALS_FRONTEND_TAG}")
+
     log(INFO_HEADER, Colors.CYAN)
 
     prepareJenkinsPipeline()
@@ -306,8 +308,6 @@ ansiColor('xterm') {
     }
 
     log('***********************************************')
-
-    notify("start release - signalen: ${params.SIGNALEN_TAG}, signals-frontend: ${params.SIGNALS_FRONTEND_TAG}")
 
     stage('Prepare workspaces') {
       log("[STEP] Prepare workspaces: ${WORKSPACES.keySet().join(', ')}")
