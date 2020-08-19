@@ -185,7 +185,7 @@ def validateSchema(String domain, String environment) {
       try {
         sh "make validate-local-schema DOMAIN=${domain} ENVIRONMENT=${environment}"
       } catch (Throwable throwable) {
-        error("schema validation failed (${domain} ${environment})")
+        error("schema validation failed: ${domain} ${environment}")
         throw throwable
       }
     }
@@ -195,10 +195,6 @@ def validateSchema(String domain, String environment) {
 // -- Jenkins pipeline pre configuration ------------------------------------------------------------------------------
 
 def prepareJenkinsPipeline() {
-  // slackSend message: "${env.JOB_NAME}: Slack test for ${env.BUILD_URL} 🦄",
-  //   channel: SLACK_NOTIFICATIONS_CHANNEL,
-  //   color: 'danger'
-
   log("Start preparing job ${env.BUILD_DISPLAY_NAME}", Colors.CYAN)
 
   if (params.CLEAN_WORKSPACE) {
