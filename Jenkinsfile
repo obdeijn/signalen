@@ -91,7 +91,7 @@ def log(message) { log(message, Colors.PURPLE) }
 def info(message) { log(message, Colors.PURPLE, '[INFO]') }
 
 def error(message) {
-  String logPrefix = '[ERROR]''
+  String logPrefix = '[ERROR]'
 
   log(message, Colors.RED, logPrefix)
   sendSlackMessage(message, logPrefix, 'danger')
