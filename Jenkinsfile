@@ -82,7 +82,7 @@ def sendSlackMessage(String message, String color) {
   String slackMessage = "${env.JOB_NAME}: ${message} failure ${env.BUILD_URL}"
 
   if (ENABLE_SLACK_NOTIFICATIONS) {
-    slackSend message: slackMessage, channel: SLACK_NOTIFICATIONS_CHANNEL, color: color
+    slackSend message: slackMessage, channel: SLACK_NOTIFICATIONS_CHANNEL, color: 'danger'
     return
   }
 
