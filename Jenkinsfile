@@ -68,10 +68,10 @@ sectionHeaderStyle = '''
 
 // -- Logging and notifications ---------------------------------------------------------------------------------------
 
-def sendSlackMessage(String message, String prefix, String slackColor) {
-  String slackMessage = "${prefix} <${env.BUILD_URL}|${env.BUILD_TAG}>\n"
-  if (env.STAGE_NAME) slackMessage += "stage: ${env.STAGE_NAME}:\n"
-  slackMessage += message
+def sendSlackMessage(String message, String slackColor) {
+  String slackMessage = "<${env.BUILD_URL}|${env.BUILD_TAG}>"
+  if (env.STAGE_NAME) slackMessage += " (stage: ${env.STAGE_NAME})"
+  slackMessage += "\n${message}"
 
   if (ENABLE_SLACK_NOTIFICATIONS) {
     slackSend message: slackMessage, channel: SLACK_NOTIFICATIONS_CHANNEL, color: slackColor
@@ -96,14 +96,14 @@ def error(message) {
   String logPrefix = '[ERROR]'
 
   log(message, Colors.RED, logPrefix)
-  sendSlackMessage(message, logPrefix, 'danger')
+  sendSlackMessage(message, 'danger')
 }
 
 def notify(message) {
   String logPrefix = '[INFO]'
 
   info(message)
-  sendSlackMessage(message, logPrefix, 'good')
+  sendSlackMessage(message, 'good')
 }
 
 def warn(message) { log(message, Colors.GREEN, '[WARNING]') }
