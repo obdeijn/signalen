@@ -66,13 +66,25 @@ sectionHeaderStyle = '''
   text-align: left;
 '''
 
-// -- Colorized logging -----------------------------------------------------------------------------------------------
+// -- Logging and notifications ---------------------------------------------------------------------------------------
+
+def sendSlackMessage(String message, String prefix, String slackColor) {
+  String slackMessage = "[${prefix}] ${env.JOB_NAME} - stage '${env.STAGE_NAME}': ${message} ${env.BUILD_URL}"
+
+  if (ENABLE_SLACK_NOTIFICATIONS) {
+    slackSend message: slackMessage, channel: SLACK_NOTIFICATIONS_CHANNEL, color: color
+    return
+  }
+
+  warn("Slack notifications are disabled, message: ${message}")
+}
 
 enum Colors {
   BLUE('\u001B[34m'), GREEN('\u001B[32m'), RED('\u001B[31m'), CYAN('\u001B[36m'), PURPLE('\u001B[35m')
   public String xterm_code
   public Colors(String xterm_code) { this.xterm_code = xterm_code }
 }
+
 def log(message, color, tag) { echo(String.format("%s%s %s%s", color.xterm_code, tag, message, '\u001B[0m')) }
 def log(message, color) { echo(String.format("%s%s%s", color.xterm_code, message, '\u001B[0m')) }
 def log(message) { log(message, Colors.PURPLE) }
@@ -85,20 +97,16 @@ def error(message) {
   sendSlackMessage(message, logPrefix, 'danger')
 }
 
+def notify(message) {
+  String logPrefix = '[INFO]'
+
+  info(message)
+  sendSlackMessage(message, logPrefix, 'good')
+}
+
 def warn(message) { log(message, Colors.GREEN, '[WARNING]') }
 
 // -- Helper functions ------------------------------------------------------------------------------------------------
-
-def sendSlackMessage(String message, String prefix, String slackColor) {
-  String slackMessage = "[${prefix}] ${env.JOB_NAME} - stage '${env.STAGE_NAME}': ${message} ${env.BUILD_URL}"
-
-  if (ENABLE_SLACK_NOTIFICATIONS) {
-    slackSend message: slackMessage, channel: SLACK_NOTIFICATIONS_CHANNEL, color: color
-    return
-  }
-
-  warn("Slack notifications are disabled, message: ${message}")
-}
 
 def tryStep(String message, Closure block) {
   try {
@@ -297,6 +305,8 @@ ansiColor('xterm') {
 
     log('***********************************************')
 
+    notify('pipeline is running')
+
     stage('Prepare workspaces') {
       log("[STEP] Prepare workspaces: ${WORKSPACES.keySet().join(', ')}")
 
@@ -378,5 +388,7 @@ ansiColor('xterm') {
         parallel steps
       }
     }
+
+    notify('pipeline is finished')
   }
 }
