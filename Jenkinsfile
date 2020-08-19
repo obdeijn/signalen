@@ -16,12 +16,12 @@ JENKINS_NODE = DEVELOPMENT ? 'master' : 'BS16 || BS17'
 DOCKER_REGISTRY_AUTH = DEVELOPMENT ? null : 'docker_registry_auth'
 
 INFO_HEADER = '''
-
-  ___(_) __ _ _ __   __ _| | ___ _ __    _ __ (_)_ __   ___| (_)_ __   ___
- / __| |/ _` | '_ \\ / _` | |/ _ \\ '_ \\  | '_ \\| | '_ \\ / _ \\ | | '_ \\ / _ \\
- \\__ \\ | (_| | | | | (_| | |  __/ | | | | |_) | | |_) |  __/ | | | | |  __/
- |___/_|\\__, |_| |_|\\__,_|_|\\___|_| |_| | .__/|_| .__/ \\___|_|_|_| |_|\\___|
-        |___/                           |_|     |_|
+     _                   _                       _
+ ___(_) __ _ _ __   __ _| | ___ _ __    _ __ ___| | ___  __ _ ___  ___
+/ __| |/ _` | '_ \\ / _` | |/ _ \\ '_ \\  | '__/ _ \\ |/ _ \\/ _` / __|/ _ \\
+\\__ \\ | (_| | | | | (_| | |  __/ | | | | | |  __/ |  __/ (_| \\__ \\  __/
+|___/_|\\__, |_| |_|\\__,_|_|\\___|_| |_| |_|  \\___|_|\\___|\\__,_|___/\\___|
+       |___/
 '''
 
 // -- Domains ---------------------------------------------------------------------------------------------------------
@@ -344,19 +344,19 @@ ansiColor('xterm') {
       log("[STEP] build signals-frontend ${params.ENVIRONMENT} image: ${workspace.currentGitRef}")
 
       try {
-        docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_AUTH) {
-          def image = docker.build(
-            "ois/signalsfrontend:${env.BUILD_NUMBER}", [
-              '--shm-size 1G',
-              "--build-arg BUILD_NUMBER=${env.BUILD_NUMBER}",
-              "--build-arg GIT_BRANCH=${params.SIGNALS_FRONTEND_TAG}",
-              "${env.WORKSPACE}/signals-frontend"
-            ].join(' ')
-          )
+        // docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_AUTH) {
+        //   def image = docker.build(
+        //     "ois/signalsfrontend:${env.BUILD_NUMBER}", [
+        //       '--shm-size 1G',
+        //       "--build-arg BUILD_NUMBER=${env.BUILD_NUMBER}",
+        //       "--build-arg GIT_BRANCH=${params.SIGNALS_FRONTEND_TAG}",
+        //       "${env.WORKSPACE}/signals-frontend"
+        //     ].join(' ')
+        //   )
 
-          image.push()
-          image.push('latest')
-        }
+        //   image.push()
+        //   image.push('latest')
+        // }
       } catch (Throwable throwable) {
         error("build of signals-frontend ${params.SIGNALS_FRONTEND_TAG} Docker image failed")
         throw throwable
