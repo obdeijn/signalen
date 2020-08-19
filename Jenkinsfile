@@ -9,7 +9,6 @@ SIGNALS_FRONTEND_REPOSITORY = 'Amsterdam/signals-frontend'
 JENKINS_GITHUB_CREDENTIALS_ID = '5b5e63e2-8db7-48c7-8e14-41cbd10eeb4a'
 DOCKER_BUILD_ARG_REGISTRY_HOST = DOCKER_REGISTRY_HOST
 SLACK_NOTIFICATIONS_CHANNEL = '#ci-signalen'
-// SLACK_NOTIFICATIONS_CHANNEL = '#ci-channel'
 
 ENABLE_SLACK_NOTIFICATIONS = !DEVELOPMENT
 JENKINS_NODE = DEVELOPMENT ? 'master' : 'BS16 || BS17'
@@ -83,7 +82,7 @@ def warn(message) { log(message, Colors.GREEN, '[WARNING]') }
 
 // -- Helper functions ------------------------------------------------------------------------------------------------
 
-def tryStep(String message, Closure block, Closure tearDown = null) {
+def tryStep(String message, Closure block) {
   try {
     block()
   } catch (Throwable throwable) {
@@ -96,8 +95,6 @@ def tryStep(String message, Closure block, Closure tearDown = null) {
     }
 
     throw throwable
-  } finally {
-    if (tearDown) tearDown()
   }
 }
 
@@ -163,9 +160,9 @@ def validateSchema(String domain, String environment) {
 // -- Jenkins pipeline pre configuration ------------------------------------------------------------------------------
 
 def prepareJenkinsPipeline() {
-  slackSend message: "${env.JOB_NAME}: Slack test for ${env.BUILD_URL} 🦄",
-    channel: SLACK_NOTIFICATIONS_CHANNEL,
-    color: 'danger'
+  // slackSend message: "${env.JOB_NAME}: Slack test for ${env.BUILD_URL} 🦄",
+  //   channel: SLACK_NOTIFICATIONS_CHANNEL,
+  //   color: 'danger'
 
   log("Start preparing job ${env.BUILD_DISPLAY_NAME}", Colors.CYAN)
 
@@ -295,11 +292,11 @@ ansiColor('xterm') {
     stage('Validate schema\'s') {
       log("[STEP] Validate ${params.ENVIRONMENT} schema's: ${DOMAINS.join(', ')}")
 
-      tryStep "VALIDATE_SCHEMAS", {
         def steps = [:]
-
         DOMAINS.each {domain -> steps["VALIDATE_SCHEMA_${domain}_${params.ENVIRONMENT}".toUpperCase()] = {
-          validateSchema domain, params.ENVIRONMENT }
+          tryStep "VALIDATE_SCHEMA_${domain}", {
+            validateSchema domain, params.ENVIRONMENT
+          }
         }
 
         parallel steps
