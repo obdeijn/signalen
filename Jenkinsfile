@@ -134,6 +134,8 @@ def checkoutWorkspace(workspace, String refName = 'origin/master') {
     log("[${workspace.name}] last Git commit message: ${lastGitCommitMessage}")
   }
 }
+
+def buildAndPushDockerImage(String domain, String environment) {
   def environmentAbbreviations = [acceptance: 'acc', production: 'prod']
 
   docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_AUTH) {
@@ -279,9 +281,9 @@ def prepareJenkinsPipeline() {
 
 ansiColor('xterm') {
   node(JENKINS_NODE) {
-    String releaseVersion = "signalen: ${params.SIGNALEN_TAG}, signals-frontend: ${params.SIGNALS_FRONTEND_TAG}"
+    String releaseDisplayName = "signalen: ${params.SIGNALEN_TAG}, signals-frontend: ${params.SIGNALS_FRONTEND_TAG}"
 
-    notify("start release - ${releaseVersion}")
+    notify("starting release - ${releaseDisplayName}")
 
     log(INFO_HEADER, Colors.CYAN)
 
@@ -390,6 +392,6 @@ ansiColor('xterm') {
       }
     }
 
-    notify("finished release - ${releaseVersion} :magic:")
+    notify("finished release - ${releaseDisplayName} :magic:")
   }
 }
