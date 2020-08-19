@@ -79,7 +79,7 @@ def sendSlackMessage(String message, String slackColor) {
     return
   }
 
-  warn("Slack notifications are disabled, message:\n${message}")
+  warn("Slack notifications are disabled, message: ${message}")
 }
 
 enum Colors {
