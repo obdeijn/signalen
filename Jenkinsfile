@@ -69,9 +69,9 @@ sectionHeaderStyle = '''
 // -- Logging and notifications ---------------------------------------------------------------------------------------
 
 def sendSlackMessage(String message, String prefix, String slackColor) {
-  String slackMessage = "${prefix} ${env.BUILD_URL} ${env.BUILD_TAG}\n"
+  String slackMessage = "${prefix} <${env.BUILD_URL}|${env.BUILD_TAG}>\n"
   if (env.STAGE_NAME) slackMessage += "stage: ${env.STAGE_NAME}:\n"
-  slackMessage += "\nmessage: ${message}"
+  slackMessage += message
 
   if (ENABLE_SLACK_NOTIFICATIONS) {
     slackSend message: slackMessage, channel: SLACK_NOTIFICATIONS_CHANNEL, color: slackColor
