@@ -10,7 +10,8 @@ JENKINS_GITHUB_CREDENTIALS_ID = '5b5e63e2-8db7-48c7-8e14-41cbd10eeb4a'
 DOCKER_BUILD_ARG_REGISTRY_HOST = DOCKER_REGISTRY_HOST
 SLACK_NOTIFICATIONS_CHANNEL = '#ci-signalen'
 
-ENABLE_SLACK_NOTIFICATIONS = !DEVELOPMENT
+ENABLE_SLACK_NOTIFICATIONS = false
+// ENABLE_SLACK_NOTIFICATIONS = !DEVELOPMENT
 JENKINS_NODE = DEVELOPMENT ? 'master' : 'BS16 || BS17'
 DOCKER_REGISTRY_AUTH = DEVELOPMENT ? null : 'docker_registry_auth'
 
@@ -110,63 +111,69 @@ def warn(message) { log(message, Colors.GREEN, '[WARNING]') }
 
 // -- Helper functions ------------------------------------------------------------------------------------------------
 
-def tryStep(String message, Closure block) {
-  try {
-    block()
-  } catch (Throwable throwable) {
-    error(message)
-    throw throwable
-  }
-}
-
 def checkoutWorkspace(workspace, String refName = 'origin/master') {
   log("[${workspace.name}] checkout Git ref: ${refName}")
 
-  checkout([
-    $class: 'GitSCM',
-    branches: [[name: refName]],
-    extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: workspace.name]],
-    userRemoteConfigs: [[credentialsId: JENKINS_GITHUB_CREDENTIALS_ID, url: workspace.repositoryUrl]]
-  ])
+  try {
+    checkout([
+      $class: 'GitSCM',
+      branches: [[name: refName]],
+      extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: workspace.name]],
+      userRemoteConfigs: [[credentialsId: JENKINS_GITHUB_CREDENTIALS_ID, url: workspace.repositoryUrl]]
+    ])
 
-  dir("${env.WORKSPACE}/${workspace.name}") {
-    def lastGitCommitMessage = sh(returnStdout: true, script: 'git show --oneline --date=relative -s')
-    log("[${workspace.name}] last Git commit message: ${lastGitCommitMessage}")
+    dir("${env.WORKSPACE}/${workspace.name}") {
+      def lastGitCommitMessage = sh(returnStdout: true, script: 'git show --oneline --date=relative -s')
+      log("[${workspace.name}] last Git commit message: ${lastGitCommitMessage}")
+    }
+  } catch (Throwable throwable) {
+    error("Git checkout failed for workspace: ${workspace.name} (Git ref: ${refName})")
+    throw throwable
   }
 }
 
 def buildAndPushDockerImage(String domain, String environment) {
   def environmentAbbreviations = [acceptance: 'acc', production: 'prod']
 
-  docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_AUTH) {
-    def image = docker.build(
-      "ois/signals-${domain}:${env.BUILD_NUMBER}", [
-        "--build-arg DOCKER_REGISTRY=${DOCKER_BUILD_ARG_REGISTRY_HOST} ",
-        '--shm-size 1G ',
-        "--build-arg BUILD_ENV=${environmentAbbreviations[environment]} ",
-        "${env.WORKSPACE}/signalen/domains/${domain}"
-      ].join(' ')
-    )
+  try {
+    docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_AUTH) {
+      def image = docker.build(
+        "ois/signals-${domain}:${env.BUILD_NUMBER}", [
+          "--build-arg DOCKER_REGISTRY=${DOCKER_BUILD_ARG_REGISTRY_HOST} ",
+          '--shm-size 1G ',
+          "--build-arg BUILD_ENV=${environmentAbbreviations[environment]} ",
+          "${env.WORKSPACE}/signalen/domains/${domain}"
+        ].join(' ')
+      )
 
-    image.push()
-    image.push(environment)
+      image.push()
+      image.push(environment)
+    }
+  } catch (Throwable throwable) {
+    error("build of signals-${domain} ${releaseDisplayName} Docker image failed")
+    throw throwable
   }
 }
 
 def deployDomain(String domain, String tag) {
   def appName = "app_signals-${domain}"
 
-  info("deploying domain: ${params.ENVIRONMENT} ${domain} ${tag} as ${appName}")
+  info("deploying domain: ${domain} to ${tag} as ${appName}")
 
-  if (params.ENVIRONMENT == 'acceptance') {
-    // build job: 'Subtask_Openstack_Playbook',
-    //   parameters: [
-    //     [$class: 'StringParameterValue', name: 'INVENTORY', value: tag],
-    //     [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy.yml'],
-    //     [$class: 'StringParameterValue', name: 'PLAYBOOKPARAMS', value: "-e cmdb_id=${appName}"],
-    //   ]
-  } else {
-    warn("safety first - only 'acceptance' environmnet is allowed to deploy until pipeline is in production")
+  try {
+    if (params.ENVIRONMENT == 'acceptance') {
+      // build job: 'Subtask_Openstack_Playbook',
+      //   parameters: [
+      //     [$class: 'StringParameterValue', name: 'INVENTORY', value: tag],
+      //     [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy.yml'],
+      //     [$class: 'StringParameterValue', name: 'PLAYBOOKPARAMS', value: "-e cmdb_id=${appName}"],
+      //   ]
+    } else {
+      warn("safety first - only 'acceptance' environmnet is allowed to deploy until pipeline is in production")
+    }
+  } catch (Throwable throwable) {
+    error("deployment of signals-${domain} ${releaseDisplayName} failed")
+    throw throwable
   }
 }
 
@@ -313,11 +320,9 @@ ansiColor('xterm') {
     stage('Prepare workspaces') {
       log("[STEP] Prepare workspaces: ${WORKSPACES.keySet().join(', ')}")
 
-      tryStep "PREPARE_WORKSPACES", {
-        WORKSPACES.each { _workspaceName, workspace ->
-          workspace.currentGitRef = params[workspace.gitRefParamName]
-          checkoutWorkspace(workspace, workspace.currentGitRef)
-        }
+      WORKSPACES.each { _workspaceName, workspace ->
+        workspace.currentGitRef = params[workspace.gitRefParamName]
+        checkoutWorkspace(workspace, workspace.currentGitRef)
       }
     }
 
@@ -338,58 +343,56 @@ ansiColor('xterm') {
 
       log("[STEP] build signals-frontend ${params.ENVIRONMENT} image: ${workspace.currentGitRef}")
 
-      tryStep 'BUILD_SIGNALS_FRONTEND_IMAGE', {
-        // docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_AUTH) {
-        //   def image = docker.build(
-        //     "ois/signalsfrontend:${env.BUILD_NUMBER}", [
-        //       '--shm-size 1G',
-        //       "--build-arg BUILD_NUMBER=${env.BUILD_NUMBER}",
-        //       "--build-arg GIT_BRANCH=${params.SIGNALS_FRONTEND_TAG}",
-        //       "${env.WORKSPACE}/signals-frontend"
-        //     ].join(' ')
-        //   )
+      try {
+        docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_AUTH) {
+          def image = docker.build(
+            "ois/signalsfrontend:${env.BUILD_NUMBER}", [
+              '--shm-size 1G',
+              "--build-arg BUILD_NUMBER=${env.BUILD_NUMBER}",
+              "--build-arg GIT_BRANCH=${params.SIGNALS_FRONTEND_TAG}",
+              "${env.WORKSPACE}/signals-frontend"
+            ].join(' ')
+          )
 
-        //   image.push()
-        //   image.push('latest')
-        // }
+          image.push()
+          image.push('latest')
+        }
+      } catch (Throwable throwable) {
+        error("build of signals-frontend ${params.SIGNALS_FRONTEND_TAG} Docker image failed")
+        throw throwable
       }
     }
 
     stage("Build domain images") {
-      tryStep 'BUILD_DOMAIN_IMAGES', {
-        info('disabled for testing')
-        // if (params.DISABLE_PARALLEL_BUILDS) {
-        //   DOMAINS.each { domain -> buildAndPushDockerImage(domain, params.ENVIRONMENT) }
-        //   return
-        // }
+      // if (params.DISABLE_PARALLEL_BUILDS) {
+      //   DOMAINS.each { domain -> buildAndPushDockerImage(domain, params.ENVIRONMENT) }
+      //   return
+      // }
 
-        // def steps = [:]
+      // def steps = [:]
 
-        // DOMAINS.each {domain -> steps["BUILD_DOMAIN_IMAGE_${domain}_${params.ENVIRONMENT}".toUpperCase()] = {
-        //   buildAndPushDockerImage domain, params.ENVIRONMENT
-        // }}
+      // DOMAINS.each {domain -> steps["BUILD_DOMAIN_IMAGE_${domain}_${params.ENVIRONMENT}".toUpperCase()] = {
+      //   buildAndPushDockerImage domain, params.ENVIRONMENT
+      // }}
 
-        // parallel steps
-      }
+      // parallel steps
     }
 
     stage('Deploy domains') {
       log("[STEP] deploy domains: ${DOMAINS.join(', ')} to ${params.ENVIRONMENT}")
 
-      tryStep 'DEPLOY_DOMAINS', {
-        if (params.DISABLE_PARALLEL_DEPLOYMENTS) {
-          DOMAINS.each { domain -> deployDomain(domain, params.ENVIRONMENT) }
-          return
-        }
-
-        def steps = [:]
-
-        DOMAINS.each {domain -> steps["DEPLOY_DOMAIN_${domain}_${params.ENVIRONMENT}".toUpperCase()] = {
-          deployDomain domain, params.ENVIRONMENT
-        }}
-
-        parallel steps
+      if (params.DISABLE_PARALLEL_DEPLOYMENTS) {
+        DOMAINS.each { domain -> deployDomain(domain, params.ENVIRONMENT) }
+        return
       }
+
+      def steps = [:]
+
+      DOMAINS.each {domain -> steps["DEPLOY_DOMAIN_${domain}_${params.ENVIRONMENT}".toUpperCase()] = {
+        deployDomain domain, params.ENVIRONMENT
+      }}
+
+      parallel steps
     }
 
     notify("finished release - ${releaseDisplayName} :magic:")
