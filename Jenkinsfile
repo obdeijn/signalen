@@ -69,9 +69,9 @@ sectionHeaderStyle = '''
 // -- Logging and notifications ---------------------------------------------------------------------------------------
 
 def sendSlackMessage(String message, String prefix, String slackColor) {
-  String slackMessage = "${prefix} ${env.JOB_NAME} ${env.BUILD_NUMBER} ${env.BUILD_TAG} "
-  if (env.STAGE_NAME) slackMessage += "- stage '${env.STAGE_NAME}': "
-  slackMessage += ${message} ${env.BUILD_URL}"
+  String slackMessage = "${prefix} ${env.BUILD_URL} ${env.BUILD_TAG}\n"
+  if (env.STAGE_NAME) slackMessage += "stage: ${env.STAGE_NAME}:\n"
+  slackMessage += "\nmessage: ${message}"
 
   if (ENABLE_SLACK_NOTIFICATIONS) {
     slackSend message: slackMessage, channel: SLACK_NOTIFICATIONS_CHANNEL, color: slackColor
@@ -307,7 +307,7 @@ ansiColor('xterm') {
 
     log('***********************************************')
 
-    notify('pipeline is running')
+    notify("start release - signalen: ${params.SIGNALEN_TAG}, signals-frontend: ${params.SIGNALS_FRONTEND_TAG}")
 
     stage('Prepare workspaces') {
       log("[STEP] Prepare workspaces: ${WORKSPACES.keySet().join(', ')}")
@@ -391,6 +391,6 @@ ansiColor('xterm') {
       }
     }
 
-    notify('pipeline is finished')
+    notify("finished release - signalen: ${params.SIGNALEN_TAG}, signals-frontend: ${params.SIGNALS_FRONTEND_TAG}")
   }
 }
