@@ -163,7 +163,7 @@ def validateSchema(String domain, String environment) {
 // -- Jenkins pipeline pre configuration ------------------------------------------------------------------------------
 
 def prepareJenkinsPipeline() {
-  slackSend message: "${env.JOB_NAME}: ${message} failure ${env.BUILD_URL}",
+  slackSend message: "${env.JOB_NAME}: Slack test for ${env.BUILD_URL}",
     channel: SLACK_NOTIFICATIONS_CHANNEL,
     color: 'danger'
 
