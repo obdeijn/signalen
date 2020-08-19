@@ -8,7 +8,7 @@ SIGNALEN_REPOSITORY = 'Amsterdam/signalen'
 SIGNALS_FRONTEND_REPOSITORY = 'Amsterdam/signals-frontend'
 JENKINS_GITHUB_CREDENTIALS_ID = '5b5e63e2-8db7-48c7-8e14-41cbd10eeb4a'
 DOCKER_BUILD_ARG_REGISTRY_HOST = DOCKER_REGISTRY_HOST
-SLACK_NOTIFICATIONS_CHANNEL = '#jpoppe'
+SLACK_NOTIFICATIONS_CHANNEL = '#ci-signalen'
 // SLACK_NOTIFICATIONS_CHANNEL = '#ci-channel'
 
 ENABLE_SLACK_NOTIFICATIONS = !DEVELOPMENT
@@ -163,7 +163,7 @@ def validateSchema(String domain, String environment) {
 // -- Jenkins pipeline pre configuration ------------------------------------------------------------------------------
 
 def prepareJenkinsPipeline() {
-  slackSend message: "${env.JOB_NAME}: Slack test for ${env.BUILD_URL}",
+  slackSend message: "${env.JOB_NAME}: Slack test for ${env.BUILD_URL} 🦄",
     channel: SLACK_NOTIFICATIONS_CHANNEL,
     color: 'danger'
 
