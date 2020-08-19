@@ -10,8 +10,7 @@ JENKINS_GITHUB_CREDENTIALS_ID = '5b5e63e2-8db7-48c7-8e14-41cbd10eeb4a'
 DOCKER_BUILD_ARG_REGISTRY_HOST = DOCKER_REGISTRY_HOST
 SLACK_NOTIFICATIONS_CHANNEL = '#ci-signalen'
 
-// ENABLE_SLACK_NOTIFICATIONS = !DEVELOPMENT
-ENABLE_SLACK_NOTIFICATIONS = false
+ENABLE_SLACK_NOTIFICATIONS = !DEVELOPMENT
 JENKINS_NODE = DEVELOPMENT ? 'master' : 'BS16 || BS17'
 DOCKER_REGISTRY_AUTH = DEVELOPMENT ? null : 'docker_registry_auth'
 
@@ -79,7 +78,7 @@ def sendSlackMessage(String message, String slackColor) {
     return
   }
 
-  warn("Slack notifications are disabled, message: ${message}")
+  warn("Slack notifications are disabled, message:\n${message}")
 }
 
 enum Colors {
@@ -135,8 +134,6 @@ def checkoutWorkspace(workspace, String refName = 'origin/master') {
     log("[${workspace.name}] last Git commit message: ${lastGitCommitMessage}")
   }
 }
-
-def buildAndPushDockerImage(String domain, String environment) {
   def environmentAbbreviations = [acceptance: 'acc', production: 'prod']
 
   docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_AUTH) {
@@ -182,7 +179,6 @@ def validateSchema(String domain, String environment) {
         error("schema validation failed (${domain} ${environment})")
         throw throwable
       }
-
     }
   }
 }
@@ -283,7 +279,9 @@ def prepareJenkinsPipeline() {
 
 ansiColor('xterm') {
   node(JENKINS_NODE) {
-    notify("start release - signalen: ${params.SIGNALEN_TAG}, signals-frontend: ${params.SIGNALS_FRONTEND_TAG}")
+    String releaseVersion = "signalen: ${params.SIGNALEN_TAG}, signals-frontend: ${params.SIGNALS_FRONTEND_TAG}"
+
+    notify("start release - ${releaseVersion}")
 
     log(INFO_HEADER, Colors.CYAN)
 
@@ -392,6 +390,6 @@ ansiColor('xterm') {
       }
     }
 
-    notify("finished release - signalen: ${params.SIGNALEN_TAG}, signals-frontend: ${params.SIGNALS_FRONTEND_TAG}")
+    notify("finished release - ${releaseVersion} :magic:")
   }
 }
