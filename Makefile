@@ -30,11 +30,10 @@ else
 SCHEMA_ENVIRONMENT := prod
 endif
 
-define validate_schema =
+define _validate_schema =
 	echo validating schema - domain=$(2), environment=$(ENVIRONMENT), schema environment=${3}; \
 	test -f ${1} || (echo validation schema definition not found: ${SCHEMA_DEFINITION_FILE}; exit 1); \
-	npx ajv-cli validate -s ${1} -d domains/${2}/${3}.config.json; \
-	echo;
+	npx ajv-cli validate -s ${1} -d domains/${2}/${3}.config.json;
 endef
 
 _MAKEFILE_BUILTIN_VARIABLES := .DEFAULT_GOAL CURDIR MAKEFLAGS MAKEFILE_LIST SHELL
@@ -84,7 +83,7 @@ logs: ## tail Docker Compose container logs
 	docker-compose logs --tail=100 -f ${DOMAIN}
 
 validate-local-schema: ## validate configuration schema in current branch. Usage `make SIGNALS_FRONTEND_PATH=../signals-frontend DOMAIN=amsterdam ENVIRONMENT=development validate-local-schema`
-	@$(call validate_schema,$(SCHEMA_DEFINITION_FILE),$(DOMAIN),$(SCHEMA_ENVIRONMENT))
+	@$(call _validate_schema,$(SCHEMA_DEFINITION_FILE),$(DOMAIN),$(SCHEMA_ENVIRONMENT))
 
 download-schema: ## download JSON validation schema definition to /tmp
 ifeq ("$(wildcard $(SCHEMA_DEFINITION_TEMP_FILE))","")
@@ -97,9 +96,9 @@ endif
 validate-all-schemas: download-schema ## validate all domain JSON schema configuration files. Usage `make SCHEMA_DEFINITION_GIT_REF=master validate-all-schemas`
 	@$(foreach domain,$(DOMAINS),\
 		$(foreach schema_environment,$(CONFIGURATION_SCHEMA_ENVIRONMENTS),\
-			$(call validate_schema,$(SCHEMA_DEFINITION_FILE),$(domain),$(schema_environment))\
+			$(call _validate_schema,$(SCHEMA_DEFINITION_FILE),$(domain),$(schema_environment))\
 		)\
 	)
 
 validate-schema: download-schema ## validate single domain schema configuration file. Usage `make DOMAIN=amsterdam ENVIRONMENT=development SCHEMA_DEFINITION_GIT_REF=master validate-schema`
-	$(call validate_schema,$(SCHEMA_DEFINITION_TEMP_FILE),$(DOMAIN),$(SCHEMA_ENVIRONMENT))
+	$(call _validate_schema,$(SCHEMA_DEFINITION_TEMP_FILE),$(DOMAIN),$(SCHEMA_ENVIRONMENT))
