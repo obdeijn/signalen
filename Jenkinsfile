@@ -301,7 +301,9 @@ ansiColor('xterm') {
       log("[STEP] Validate ${params.ENVIRONMENT} schema's: ${DOMAINS.join(', ')}")
 
       def steps = [:]
-      DOMAINS.each {domain ->  { validateSchema domain, params.ENVIRONMENT }}
+      DOMAINS.each {domain -> steps["VALIDATE_SCHEMA_${domain}_${params.ENVIRONMENT}".toUpperCase()] = {
+        validateSchema domain, params.ENVIRONMENT }
+      }
       parallel steps
     }
 
