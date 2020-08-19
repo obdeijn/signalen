@@ -79,18 +79,18 @@ def log(message) { log(message, Colors.PURPLE) }
 def info(message) { log(message, Colors.PURPLE, '[INFO]') }
 
 def error(message) {
-  String errorMessage = "[ERROR] ${message}"
+  String logPrefix = '[ERROR]''
 
-  log(message, Colors.RED)
-  sendSlackMessage(errorMessage, 'danger')
+  log(message, Colors.RED, logPrefix)
+  sendSlackMessage(message, logPrefix, 'danger')
 }
 
 def warn(message) { log(message, Colors.GREEN, '[WARNING]') }
 
 // -- Helper functions ------------------------------------------------------------------------------------------------
 
-def sendSlackMessage(String message, String color) {
-  String slackMessage = "${env.JOB_NAME} - ${env.STAGE_NAME}: ${message} failure ${env.BUILD_URL}"
+def sendSlackMessage(String message, String prefix, String slackColor) {
+  String slackMessage = "[${prefix}] ${env.JOB_NAME} - stage '${env.STAGE_NAME}': ${message} ${env.BUILD_URL}"
 
   if (ENABLE_SLACK_NOTIFICATIONS) {
     slackSend message: slackMessage, channel: SLACK_NOTIFICATIONS_CHANNEL, color: color
@@ -104,7 +104,7 @@ def tryStep(String message, Closure block) {
   try {
     block()
   } catch (Throwable throwable) {
-    error(message, 'danger')
+    error(message)
     throw throwable
   }
 }
