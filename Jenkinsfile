@@ -312,19 +312,19 @@ ansiColor('xterm') {
       log("[STEP] build signals-frontend ${params.ENVIRONMENT} image: ${workspace.currentGitRef}")
 
       tryStep 'BUILD_SIGNALS_FRONTEND_IMAGE', {
-        docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_AUTH) {
-          def image = docker.build(
-            "ois/signalsfrontend:${env.BUILD_NUMBER}", [
-              '--shm-size 1G',
-              "--build-arg BUILD_NUMBER=${env.BUILD_NUMBER}",
-              "--build-arg GIT_BRANCH=${params.SIGNALS_FRONTEND_TAG}",
-              "${env.WORKSPACE}/signals-frontend"
-            ].join(' ')
-          )
+        // docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_AUTH) {
+        //   def image = docker.build(
+        //     "ois/signalsfrontend:${env.BUILD_NUMBER}", [
+        //       '--shm-size 1G',
+        //       "--build-arg BUILD_NUMBER=${env.BUILD_NUMBER}",
+        //       "--build-arg GIT_BRANCH=${params.SIGNALS_FRONTEND_TAG}",
+        //       "${env.WORKSPACE}/signals-frontend"
+        //     ].join(' ')
+        //   )
 
-          image.push()
-          image.push('latest')
-        }
+        //   image.push()
+        //   image.push('latest')
+        // }
       }
     }
 
