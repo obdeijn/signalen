@@ -240,7 +240,6 @@ def prepareJenkinsPipeline() {
         separatorStyle: separatorStyle,
         sectionHeaderStyle: sectionHeaderStyle
       ],
-      booleanParam(name: 'DRY_RUN', description: 'skip building images and deployments', defaultValue: false),
       booleanParam(name: 'DISABLE_PARALLEL_BUILDS', description: 'disable parallel builds', defaultValue: false),
       booleanParam(
         name: 'DISABLE_PARALLEL_DEPLOYMENTS',
