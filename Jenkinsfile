@@ -150,9 +150,8 @@ def deployDomain(String domain, String tag) {
 }
 
 def validateSchema(String domain, String environment) {
-  sh 'false'
-
   info("validating schema: ${domain} ${environment} ${SIGNALEN_TAG}+${SIGNALS_FRONTEND_TAG}")
+  sh 'false'
 
   nodejs(nodeJSInstallationName: 'node12') {
     dir("${env.WORKSPACE}/signalen") {
