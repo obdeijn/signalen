@@ -85,13 +85,6 @@ def error(message) {
   sendSlackMessage(errorMessage, 'danger')
 }
 
-def error(message) {
-  String errorMessage = "[ERROR] ${message}"
-
-  log(message, Colors.RED)
-  sendSlackMessage(errorMessage, 'danger')
-}
-
 def warn(message) { log(message, Colors.GREEN, '[WARNING]') }
 
 // -- Helper functions ------------------------------------------------------------------------------------------------
