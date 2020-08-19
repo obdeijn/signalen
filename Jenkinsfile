@@ -6,10 +6,10 @@ DEVELOPMENT = false
 
 SIGNALEN_REPOSITORY = 'Amsterdam/signalen'
 SIGNALS_FRONTEND_REPOSITORY = 'Amsterdam/signals-frontend'
-GITHUB_CREDENTIALS_ID = '5b5e63e2-8db7-48c7-8e14-41cbd10eeb4a'
+JENKINS_GITHUB_CREDENTIALS_ID = '5b5e63e2-8db7-48c7-8e14-41cbd10eeb4a'
 DOCKER_BUILD_ARG_REGISTRY_HOST = DOCKER_REGISTRY_HOST
 SLACK_NOTIFICATIONS_CHANNEL = '#jpoppe'
-// SLACK_NOTIFICATIONS_CHANNEL = '#ci-chanel'
+// SLACK_NOTIFICATIONS_CHANNEL = '#ci-channel'
 
 ENABLE_SLACK_NOTIFICATIONS = !DEVELOPMENT
 JENKINS_NODE = DEVELOPMENT ? 'master' : 'BS16 || BS17'
@@ -108,7 +108,7 @@ def checkoutWorkspace(workspace, String refName = 'origin/master') {
     $class: 'GitSCM',
     branches: [[name: refName]],
     extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: workspace.name]],
-    userRemoteConfigs: [[credentialsId: GITHUB_CREDENTIALS_ID, url: workspace.repositoryUrl]]
+    userRemoteConfigs: [[credentialsId: JENKINS_GITHUB_CREDENTIALS_ID, url: workspace.repositoryUrl]]
   ])
 
   dir("${env.WORKSPACE}/${workspace.name}") {
@@ -170,12 +170,10 @@ def prepareJenkinsPipeline() {
     cleanWs()
   }
 
-  WORKSPACES.each { key, workspace -> checkoutWorkspace(workspace) }
+  WORKSPACES.each { _workspaceName, workspace -> checkoutWorkspace(workspace) }
   DOMAINS = dir("${env.WORKSPACE}/signalen") { sh(returnStdout: true, script: 'make list-domains').split() }
 
   properties([
-    // uncomment the following line to trigger builds by GitHub WebHook triggers
-    // pipelineTriggers([githubPush()]),
     durabilityHint('PERFORMANCE_OPTIMIZED'),
     parameters([
       [
@@ -274,7 +272,9 @@ ansiColor('xterm') {
       Colors.CYAN
     )
 
-    params.each {key, value -> if (!key.startsWith('_')) log("${key}=${value}", Colors.CYAN) }
+    params.each {parameterName, parameterValue -> if (!parameterName.startsWith('_'))
+      log("${parameterName}=${parameterValue}", Colors.CYAN)
+    }
 
     log('***********************************************')
 
@@ -282,7 +282,7 @@ ansiColor('xterm') {
       log("[STEP] Prepare workspaces: ${WORKSPACES.keySet().join(', ')}")
 
       tryStep "PREPARE_WORKSPACES", {
-        WORKSPACES.each { key, workspace ->
+        WORKSPACES.each { _workspaceName, workspace ->
           workspace.currentGitRef = params[workspace.gitRefParamName]
           checkoutWorkspace(workspace, workspace.currentGitRef)
         }
