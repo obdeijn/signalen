@@ -2,7 +2,7 @@
 .DEFAULT_GOAL := help
 
 # PHONY prevents filenames being used as targets
-.PHONY: help info rebuild list-domains status start start-domain stop logs restart build validate-schema get-schema validate-remote-schema validate-remote-schemas build-base shell
+.PHONY: help info rebuild list-domains status start stop logs restart build validate-schema get-schema validate-remote-schema validate-remote-schemas build-base shell
 
 # constants
 ENVIRONMENTS := development acceptance production
@@ -61,7 +61,7 @@ build: ## build Docker Compose images
 list-domains: ## list frontend domains
 	@echo ${DOMAINS}
 
-start: ## start single Docker Compose service. Usage `make DOMAIN=amsterdam start-domain`
+start: ## start single Docker Compose service. Usage `make DOMAIN=amsterdam start`
 	docker-compose up --remove-orphans ${DOMAIN}
 
 stop: ## stop Docker Compose
