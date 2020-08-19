@@ -155,7 +155,12 @@ def validateSchema(String domain, String environment) {
   nodejs(nodeJSInstallationName: 'node12') {
     dir("${env.WORKSPACE}/signalen") {
       // sh 'false'
-      sh "make validate-local-schema DOMAIN=${domain} ENVIRONMENT=${environment}"
+      Integer statusCode = sh(script: "make validate-local-schema DOMAIN=${domain} ENVIRONMENT=${environment}", returnStatus=true)
+      if (statusCode != 0) {
+        sh "echo 'exit code is NOT zero' ${statusCode}"
+      } else {
+        sh "echo 'exit code is zero'"
+      }
       // try {
       // sh "make validate-local-schema DOMAIN=${domain} ENVIRONMENT=${environment}"
       // } catch (Throwable throwable) {
