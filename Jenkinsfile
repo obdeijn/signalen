@@ -77,7 +77,23 @@ def log(message, color, tag) { echo(String.format("%s%s %s%s", color.xterm_code,
 def log(message, color) { echo(String.format("%s%s%s", color.xterm_code, message, '\u001B[0m')) }
 def log(message) { log(message, Colors.PURPLE) }
 def info(message) { log(message, Colors.PURPLE, '[INFO]') }
-def error(message) { log(message, Colors.RED, '[ERROR]') }
+
+def sendSlackMessage(String message, String color) {
+  String slackMessage = "${env.JOB_NAME}: ${message} failure ${env.BUILD_URL}"
+
+  if (ENABLE_SLACK_NOTIFICATIONS) {
+    slackSend message: slackMessage, channel: SLACK_NOTIFICATIONS_CHANNEL, color: color
+    return
+  }
+
+  warn("Slack notifications are disabled, message: ${message}")
+}
+
+def error(message) {
+  log(message, Colors.RED, '[ERROR]')
+  sendSlackMessage(message, 'danger')
+}
+
 def warn(message) { log(message, Colors.GREEN, '[WARNING]') }
 
 // -- Helper functions ------------------------------------------------------------------------------------------------
@@ -157,7 +173,7 @@ def validateSchema(String domain, String environment) {
       try {
         sh "make validate-local-schema DOMAIN=${domain} ENVIRONMENT=${environment}"
       } catch (Throwable throwable) {
-        error("schema validation failed: ${domain} ${environment}")
+        error("schema validation failed (${domain} ${environment})")
         throw throwable
       }
 
@@ -301,9 +317,11 @@ ansiColor('xterm') {
       log("[STEP] Validate ${params.ENVIRONMENT} schema's: ${DOMAINS.join(', ')}")
 
       def steps = [:]
+
       DOMAINS.each {domain -> steps["VALIDATE_SCHEMA_${domain}_${params.ENVIRONMENT}".toUpperCase()] = {
-        validateSchema domain, params.ENVIRONMENT }
-      }
+        validateSchema domain, params.ENVIRONMENT
+      }}
+
       parallel steps
     }
 
