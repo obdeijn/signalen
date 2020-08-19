@@ -151,7 +151,18 @@ def deployDomain(String domain, String tag) {
 
 def validateSchema(String domain, String environment) {
   info("validating schema: ${domain} ${environment} ${SIGNALEN_TAG}+${SIGNALS_FRONTEND_TAG}")
-  sh "make validate-local-schema DOMAIN=${domain} ENVIRONMENT=${environment}"
+
+  nodejs(nodeJSInstallationName: 'node12') {
+    dir("${env.WORKSPACE}/signalen") {
+      try {
+        sh "make validate-local-schema DOMAIN=${domain} ENVIRONMENT=${environment}"
+      } catch (Throwable throwable) {
+        error("schema validation failed: ${domain} ${environment}")
+        throw throwable
+      }
+
+    }
+  }
 }
 
 // -- Jenkins pipeline pre configuration ------------------------------------------------------------------------------
@@ -289,20 +300,18 @@ ansiColor('xterm') {
     stage('Validate schema\'s') {
       log("[STEP] Validate ${params.ENVIRONMENT} schema's: ${DOMAINS.join(', ')}")
 
-      nodejs(nodeJSInstallationName: 'node12') {
-        dir("${env.WORKSPACE}/signalen") {
-          DOMAINS.each { domain -> validateSchema(domain, params.ENVIRONMENT) }
-        }
-      }
+      sh 'false'
 
-        // def steps = [:]
-        // DOMAINS.each {domain ->  {
-        //   // tryStep "VALIDATE_SCHEMA_${domain}", {
-        //     validateSchema domain, params.ENVIRONMENT
-        //   // }
-        // }}
+      DOMAINS.each { domain -> validateSchema(domain, params.ENVIRONMENT) }
 
-        // parallel steps
+      // def steps = [:]
+      // DOMAINS.each {domain ->  {
+      //   // tryStep "VALIDATE_SCHEMA_${domain}", {
+      //     validateSchema domain, params.ENVIRONMENT
+      //   // }
+      // }}
+
+      // parallel steps
     }
 
     stage('Build signals-frontend image') {
