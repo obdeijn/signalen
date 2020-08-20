@@ -33,7 +33,9 @@ const iconSlugs = {
   chore: ':wrench:',
   unknown: ':face_palm:',
   'e2e test': ':traffic_light:',
-  'core task': ':package:'
+  'core task': ':package:',
+  spike: ':zap:',
+  task: ':zap:'
 }
 
 export const getSemanticVersionType = (version: string): SemanticVersion => {
@@ -64,10 +66,18 @@ export default class ReleaseService {
       chore: [],
       'e2e test': [],
       'core task': [],
-      unknown: []
+      unknown: [],
+      spike: [],
+      task: []
     }
 
     Object.values(issues.reduce((group: GroupedIssues, issue: Issue) => {
+      if (!group[issue.type]) {
+        console.log('')
+        console.log(issue.type)
+        console.log('')
+      }
+
       group[issue.type].push(issue)
       return group
     }, groupedIssues))
@@ -87,6 +97,7 @@ export default class ReleaseService {
     const response = await this.gitHubService.query(pullRequestIssuesQuery, {number: releaseSummary.number})
 
     return response.repository.pullRequest.commits.edges
+      .filter((edge: {node: {commit: any}}): GitHubIssue[] => edge.node.commit.associatedPullRequests.edges[0])
       .map((edge: {node: {commit: any}}): GitHubIssue[] => edge.node.commit.associatedPullRequests.edges[0].node)
       .sort((current: GitHubIssue, next: GitHubIssue) => current.number > next.number ? 1 : -1)
       .reduce((array: GitHubIssue[], gitHubIssue: GitHubIssue) => {

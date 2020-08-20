@@ -29,16 +29,27 @@ export default class JiraService {
 
   public async getIssue(jiraKey: string) {
     const issue = await this.get(`issue/${jiraKey}`)
+    let jiraIssue: JiraIssue
 
-    const jiraIssue: JiraIssue = {
-      key: issue.key,
-      type: this.getIssueType(issue.fields.summary, issue.fields.issuetype.name),
-      status: issue.fields.status.name.toLowerCase(),
-      title: issue.fields.summary.replace('[TEST] ', ''),
-      url: this.getIssueUrl(issue.key)
+    try {
+      jiraIssue = {
+        key: issue.key,
+        type: this.getIssueType(issue.fields.summary, issue.fields.issuetype.name),
+        status: issue.fields.status.name.toLowerCase(),
+        title: issue.fields.summary.replace('[TEST] ', ''),
+        url: this.getIssueUrl(issue.key)
+      }
+    } catch {
+      jiraIssue = {
+        key: jiraKey,
+        type: 'ticket',
+        status: 'approved',
+        title: '',
+        url: '',
+      };
     }
 
-    if (!issue.fields.parent) return {jiraIssue}
+    if (!issue?.fields?.parent) return {jiraIssue}
 
     const jiraParentIssueType = this.getIssueType(
       issue.fields.parent.fields.summary,
