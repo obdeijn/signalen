@@ -40,7 +40,6 @@
     "privacy": "https://www.amsterdam.nl/privacy/specifieke/privacyverklaringen-wonen/meldingen-overlast-privacy/"
   },
   "map": {
-    "municipality": ["amsterdam", "amstelveen"],
     "tiles": {
       "args": ["https://{s}.data.amsterdam.nl/topo_rd/{z}/{x}/{y}.png"],
       "options": {
@@ -65,6 +64,7 @@
       "zoom": 7
     }
   },
+  "useStaticMapServer": true,
   "fetchQuestionsFromBackend": false,
   "theme": {},
   "showVulaanControls": true,
