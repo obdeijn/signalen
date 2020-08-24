@@ -24,7 +24,7 @@ def call(body) {
     ]
   ]
 
-  releaseRefs = ''
+  String gitRefs = ''
 
   def pipelineParameters= [:]
 
@@ -98,7 +98,7 @@ def call(body) {
       stage('checkout signalen') {
         steps {
           script {
-            releaseRefs = "signalen: ${params.SIGNALEN_BRANCH}, signals-frontend: ${BRANCH_NAME}"
+            gitRefs = "signalen: ${params.SIGNALEN_BRANCH}, signals-frontend: ${BRANCH_NAME}"
             log.info('🌈 checking out the signalen repository 🌈')
 
             utils.checkoutWorkspace(JENKINS_GITHUB_CREDENTIALS_ID, REPOSITORIES.signalen, params.SIGNALEN_BRANCH)
@@ -115,8 +115,8 @@ def call(body) {
       stage('validate') {
         steps {
           script {
-            signalen.validateDomainSchemas('acceptance', signalen.getDomains(), '..', releaseRefs)
-            signalen.validateDomainSchemas('production', signalen.getDomains(), '..', releaseRefs)
+            signalen.validateDomainSchemas('acceptance', signalen.getDomains(), '..', gitRefs)
+            signalen.validateDomainSchemas('production', signalen.getDomains(), '..', gitRefs)
           }
         }
       }
@@ -132,7 +132,12 @@ def call(body) {
       stage ('build domain images') {
         steps {
           script {
-            signalen.buildAndPushDockerDomainImages(DOCKER_BUILD_ARG_REGISTRY_HOST, 'acceptance', signalen.getDomains())
+            signalen.buildAndPushDockerDomainImages(
+              DOCKER_BUILD_ARG_REGISTRY_HOST,
+              'acceptance',
+              signalen.getDomains(),
+              gitRefs
+            )
           }
 
           // parallel (
@@ -145,7 +150,7 @@ def call(body) {
       stage('deploy domains'){
         steps {
           script {
-            signalen.deployDomains('acceptance', signalen.getDomains())
+            signalen.deployDomains('acceptance', signalen.getDomains(), gitRefs)
           }
         }
       }

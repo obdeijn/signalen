@@ -6,15 +6,15 @@ enum Colors {
   public Colors(String xterm_code) { this.xterm_code = xterm_code }
 }
 
-def _sendSlackMessage(String channel, def message, Boolean notificationsEnabled, String color) {
+def _sendSlackMessage(def message, String color) {
   String slackMessage = "<${env.BUILD_URL}|${env.BUILD_TAG}>"
 
   if (env.STAGE_NAME) slackMessage += " (stage: ${env.STAGE_NAME})"
 
   slackMessage += "\n${message}"
 
-  if (notificationsEnabled) {
-    slackSend message: slackMessage, channel: channel, color: color
+  if (env.SLACK_NOTIFICATIONS_ENABLED) {
+    slackSend message: slackMessage, channel: env.SLACK_NOTIFICATIONS_CHANNEL, color: color
     return
   }
 
@@ -58,12 +58,12 @@ def warning(message) { console(message, Colors.GREEN, '[WARNING]') }
 
 def separator() { console('**********************************************************') }
 
-def notify(String channel, def message, Boolean notificationsEnabled) {
+def notify(def message) {
   info(message)
-  _sendSlackMessage(channel, message, notificationsEnabled, 'good')
+  _sendSlackMessage(message, 'good')
 }
 
-def notifyError(String channel, def message, Boolean notificationsEnabled) {
+def notifyError(def message) {
   error(message)
-  _sendSlackMessage(channel, message, notificationsEnabled, 'danger')
+  _sendSlackMessage(message, 'danger')
 }

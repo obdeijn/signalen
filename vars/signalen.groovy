@@ -122,13 +122,13 @@ def deployDomain(String dockerImageTag, String domain, String repositoryRefs) {
   }
 }
 
-def deployDomains(String environment, String[] domains) {
+def deployDomains(String environment, String[] domains, String gitRefs) {
   log.console("deploying ${domains.join(', ')} to environment ${environment}")
 
   def steps = [:]
 
   domains.each {domain -> steps["DEPLOY_DOMAIN_${domain}_${environment}".toUpperCase()] = {
-    deployDomain environment, domain
+    deployDomain environment, domain, gitRefs
   }}
 
   parallel steps
