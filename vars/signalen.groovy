@@ -107,12 +107,12 @@ def deployDomain(String dockerImageTag, String domain, String repositoryRefs) {
 
   try {
     if (params.ENVIRONMENT == 'acceptance') {
-      // build job: 'Subtask_Openstack_Playbook',
-      //   parameters: [
-      //     [$class: 'StringParameterValue', name: 'INVENTORY', value: dockerImageTag],
-      //     [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy.yml'],
-      //     [$class: 'StringParameterValue', name: 'PLAYBOOKPARAMS', value: "-e cmdb_id=${appName}"],
-      //   ]
+      build job: 'Subtask_Openstack_Playbook',
+        parameters: [
+          [$class: 'StringParameterValue', name: 'INVENTORY', value: dockerImageTag],
+          [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy.yml'],
+          [$class: 'StringParameterValue', name: 'PLAYBOOKPARAMS', value: "-e cmdb_id=${appName}"],
+        ]
     } else {
       log.warning("safety first - only 'acceptance' environmnet is allowed to deploy until pipeline is in production")
     }
