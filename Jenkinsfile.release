@@ -79,7 +79,7 @@ ansiColor('xterm') {
 
     String[] targetDomains = params.DOMAIN ? [params.DOMAIN] : signalen.getDomains()
 
-    log.notify("finished `${params.ENVIRONMENT}` release - ${releaseRefs} | domains: ${targetDomains.join(', ')}")
+    log.notify("starting `${params.ENVIRONMENT}` release - ${releaseRefs} | domains: ${targetDomains.join(', ')}")
 
     signalen.logBuildInformation(targetDomains, DOCKER_BUILD_ARG_REGISTRY_HOST)
 
