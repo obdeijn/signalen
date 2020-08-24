@@ -79,7 +79,7 @@ ansiColor('xterm') {
 
     String[] targetDomains = params.DOMAIN ? [params.DOMAIN] : signalen.getDomains()
 
-    log.notify("starting `${params.ENVIRONMENT}` release - ${releaseRefs} (domain(s): ${targetDomains.join(', ')})")
+    log.notify("finished `${params.ENVIRONMENT}` release - ${releaseRefs} | domains: ${targetDomains.join(', ')}")
 
     signalen.logBuildInformation(targetDomains, DOCKER_BUILD_ARG_REGISTRY_HOST)
 
@@ -108,6 +108,6 @@ ansiColor('xterm') {
 
     stage('Deploy domains') { signalen.deployDomains(params.ENVIRONMENT, targetDomains, releaseRefs) }
 
-    log.notify("starting `${params.ENVIRONMENT}` release - ${releaseRefs} (domain(s): ${targetDomains.join(', ')})")
+    log.notify("finished `${params.ENVIRONMENT}` release - ${releaseRefs} | domains: ${targetDomains.join(', ')}")
   }
 }
