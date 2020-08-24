@@ -1,0 +1,3 @@
+@Library('signalen@master') _
+
+signalenAcceptancePipeline { }
