@@ -10,15 +10,10 @@ env.SLACK_NOTIFICATIONS_CHANNEL = '#ci-signalen'
 JENKINS_NODE = env.DEVELOPMENT ? 'master' : 'BS16 || BS17'
 DOCKER_REGISTRY_AUTH = env.DEVELOPMENT ? null : 'docker_registry_auth'
 
-SIGNALEN_REPOSITORY = 'jpoppe/signalen'
-SIGNALS_FRONTEND_REPOSITORY = 'jpoppe/signals-frontend'
-JENKINS_GITHUB_CREDENTIALS_ID = '431d5971-5b08-46d8-b225-74368ee31ec0'
-DOCKER_BUILD_ARG_REGISTRY_HOST = DOCKER_REGISTRY_HOST_SHORT
-
-// SIGNALEN_REPOSITORY = 'Amsterdam/signalen'
-// SIGNALS_FRONTEND_REPOSITORY = 'Amsterdam/signals-frontend'
-// JENKINS_GITHUB_CREDENTIALS_ID = '5b5e63e2-8db7-48c7-8e14-41cbd10eeb4a'
-// DOCKER_BUILD_ARG_REGISTRY_HOST = DOCKER_REGISTRY_HOST
+SIGNALEN_REPOSITORY = 'Amsterdam/signalen'
+SIGNALS_FRONTEND_REPOSITORY = 'Amsterdam/signals-frontend'
+JENKINS_GITHUB_CREDENTIALS_ID = '5b5e63e2-8db7-48c7-8e14-41cbd10eeb4a'
+DOCKER_BUILD_ARG_REGISTRY_HOST = DOCKER_REGISTRY_HOST
 
 // -- Other Globals ---------------------------------------------------------------------------------------------------
 
