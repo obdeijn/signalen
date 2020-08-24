@@ -4,7 +4,7 @@
 
 // -- Development Options ---------------------------------------------------------------------------------------------
 
-env.DEVELOPMENT = true
+env.DEVELOPMENT = false
 env.SLACK_NOTIFICATIONS_ENABLED = !env.DEVELOPMENT
 env.SLACK_NOTIFICATIONS_CHANNEL = '#ci-signalen'
 JENKINS_NODE = env.DEVELOPMENT ? 'master' : 'BS16 || BS17'
@@ -49,7 +49,7 @@ ansiColor('xterm') {
 
     String releaseRefs = "signalen: ${params.SIGNALEN_RELEASE_TAG}, signals-frontend: ${params.SIGNALS_FRONTEND_RELEASE_TAG}"
 
-    // log.notify(SLACK_NOTIFICATIONS_CHANNEL, "starting release - ${releaseRefs}", SLACK_NOTIFICATIONS_ENABLED)
+    log.notify(SLACK_NOTIFICATIONS_CHANNEL, "starting release - ${releaseRefs}", SLACK_NOTIFICATIONS_ENABLED)
 
     if (params.CLEAN_WORKSPACE) {
       log.info('cleaning workspace folders')
@@ -107,6 +107,6 @@ ansiColor('xterm') {
 
     stage('Deploy domains') { signalen.deployDomains(params.ENVIRONMENT, targetDomains) }
 
-    // log.notify(SLACK_NOTIFICATIONS_CHANNEL, "finished release - ${releaseRefs}", SLACK_NOTIFICATIONS_ENABLED)
+    log.notify(SLACK_NOTIFICATIONS_CHANNEL, "finished release - ${releaseRefs}", SLACK_NOTIFICATIONS_ENABLED)
   }
 }
