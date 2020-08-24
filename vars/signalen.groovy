@@ -106,16 +106,12 @@ def deployDomain(String dockerImageTag, String domain, String repositoryRefs) {
   log.info("deploying domain ${domain} to ${dockerImageTag} as ${appName}")
 
   try {
-    if (params.ENVIRONMENT == 'acceptance') {
-      build job: 'Subtask_Openstack_Playbook',
-        parameters: [
-          [$class: 'StringParameterValue', name: 'INVENTORY', value: dockerImageTag],
-          [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy.yml'],
-          [$class: 'StringParameterValue', name: 'PLAYBOOKPARAMS', value: "-e cmdb_id=${appName}"],
-        ]
-    } else {
-      log.warning("safety first - only 'acceptance' environmnet is allowed to deploy until pipeline is in production")
-    }
+    build job: 'Subtask_Openstack_Playbook',
+      parameters: [
+        [$class: 'StringParameterValue', name: 'INVENTORY', value: dockerImageTag],
+        [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy.yml'],
+        [$class: 'StringParameterValue', name: 'PLAYBOOKPARAMS', value: "-e cmdb_id=${appName}"],
+      ]
   } catch (Throwable throwable) {
     log.error("deployment of signals-${domain} ${repositoryRefs} failed")
     throw throwable
