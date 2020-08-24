@@ -49,8 +49,6 @@ ansiColor('xterm') {
 
     String releaseRefs = "signalen: ${params.SIGNALEN_RELEASE_TAG}, signals-frontend: ${params.SIGNALS_FRONTEND_RELEASE_TAG}"
 
-    log.notify("starting release - ${releaseRefs}")
-
     if (params.CLEAN_WORKSPACE) {
       log.info('cleaning workspace folders')
       cleanWs()
@@ -73,13 +71,15 @@ ansiColor('xterm') {
         choice(
           description: 'build and deploy a single domain instead of all domains',
           name: 'DOMAIN',
-          choices: ['', 'weesp', 'amsterdam', 'amsterdamsebos']
+          choices: ['', 'amsterdam', 'amsterdamsebos', 'weesp']
         ),
-        choice(description: 'target environment', name: 'ENVIRONMENT', choices: ['acceptance', 'production'])
+        choice(description: 'target environment', name: 'ENVIRONMENT', choices: ['production', 'acceptance'])
       ])
     ])
 
     String[] targetDomains = params.DOMAIN ? [params.DOMAIN] : signalen.getDomains()
+
+    log.notify("starting `${params.ENVIRONMENT}` release - ${releaseRefs} (domain(s): ${targetDomains.join(', ')})")
 
     signalen.logBuildInformation(targetDomains, DOCKER_BUILD_ARG_REGISTRY_HOST)
 
@@ -106,10 +106,8 @@ ansiColor('xterm') {
       )
     }
 
-    stage('Deploy domains') {
-      signalen.deployDomains(params.ENVIRONMENT, targetDomains, releaseRefs)
-    }
+    stage('Deploy domains') { signalen.deployDomains(params.ENVIRONMENT, targetDomains, releaseRefs) }
 
-    log.notify("finished release - ${releaseRefs}")
+    log.notify("starting `${params.ENVIRONMENT}` release - ${releaseRefs} (domain(s): ${targetDomains.join(', ')})")
   }
 }
