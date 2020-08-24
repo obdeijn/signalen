@@ -102,6 +102,7 @@ ansiColor('xterm') {
         DOCKER_BUILD_ARG_REGISTRY_HOST,
         params.ENVIRONMENT,
         targetDomains,
+        releaseRefs
       )
     }
 
