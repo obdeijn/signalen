@@ -55,7 +55,7 @@ def call(body) {
 
     triggers {
       githubPush() // listen for GitHub webhooks
-      pollSCM('*/30 * * * *') // poll every 30 minutes for repository changes (fallback for Github webhooks)
+      pollSCM('H/45 * * * *') // poll every 45 minutes for repository changes (fallback for Github webhooks)
     }
 
     options {
