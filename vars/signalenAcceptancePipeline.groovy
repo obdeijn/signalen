@@ -97,7 +97,6 @@ def call(body) {
       stage('Validate Domain Schema\'s') {
         steps {
           script {
-            // log.warning('validate has been disabled for development purposes')
             signalen.validateDomainSchemas(settings.ENVIRONMENT, settings.DOMAINS, '../signals-frontend', GIT_REFS)
           }
         }
@@ -106,12 +105,12 @@ def call(body) {
       stage('Build `signals-frontend` Base Image') {
         steps {
           script {
-            // log.warning('buildAndPushSignalsFrontendDockerImage has been disabled for development purposes')
+            log.warning('buildAndPushSignalsFrontendDockerImage has been disabled for development purposes')
 
-            signalen.buildAndPushSignalsFrontendDockerImage(
-              settings.SIGNALS_FRONTEND_BRANCH,
-              'signals-frontend'
-            )
+            // signalen.buildAndPushSignalsFrontendDockerImage(
+            //   settings.SIGNALS_FRONTEND_BRANCH,
+            //   'signals-frontend'
+            // )
           }
         }
       }
@@ -119,14 +118,14 @@ def call(body) {
       stage ('Build Domain Images') {
         steps {
           script {
-            // log.warning('buildAndPushDockerDomainImages has been disabled for development purposes')
+            log.warning('buildAndPushDockerDomainImages has been disabled for development purposes')
 
-            signalen.buildAndPushDockerDomainImages(
-              settings.DOCKER_BUILD_ARG_REGISTRY_HOST,
-              settings.ENVIRONMENT,
-              settings.DOMAINS,
-              GIT_REFS
-            )
+            // signalen.buildAndPushDockerDomainImages(
+            //   settings.DOCKER_BUILD_ARG_REGISTRY_HOST,
+            //   settings.ENVIRONMENT,
+            //   settings.DOMAINS,
+            //   GIT_REFS
+            // )
           }
         }
       }
@@ -134,9 +133,9 @@ def call(body) {
       stage('Deploy Domains') {
         steps {
           script {
-            // log.warning('deployDomains has been disabled for development purposes')
+            log.warning('deployDomains has been disabled for development purposes')
 
-            signalen.deployDomains('acceptance', settings.DOMAINS, GIT_REFS)
+            // signalen.deployDomains('acceptance', settings.DOMAINS, GIT_REFS)
           }
         }
       }
