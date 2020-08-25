@@ -3,7 +3,7 @@ def call(body) {
 
   String GIT_REFS = ''
 
-  def pipelineParameters= [:]
+  def settings = [:]
 
   ansiColor('xterm') {
     log.highlight('''
@@ -18,29 +18,30 @@ def call(body) {
     log.info('🦄 we are now in the scripted "pre declarative" pipeline scope 🦄')
 
     body.resolveStrategy = Closure.DELEGATE_FIRST
-    body.delegate = pipelineParameters
+    body.delegate = settings
     body()
 
     log.info('pipeline parameters:')
-    log.highlight(pipelineParameters)
+    log.highlight(settings)
 
     REPOSITORIES = [
       signalen: [
         name: 'signalen',
-        repositoryUrl: "https://github.com/${pipelineParameters.SIGNALEN_REPOSITORY}.git"
+        repositoryUrl: "https://github.com/${settings.SIGNALEN_REPOSITORY}.git"
       ],
       signalsFrontend: [
         name: 'signals-frontend',
-        repositoryUrl: "https://github.com/${pipelineParameters.SIGNALS_FRONTEND_REPOSITORY}.git"
+        repositoryUrl: "https://github.com/${settings.SIGNALS_FRONTEND_REPOSITORY}.git"
       ]
     ]
 
-    env.SLACK_NOTIFICATIONS_ENABLED = pipelineParameters.SLACK_NOTIFICATIONS_ENABLED
-    env.SLACK_NOTIFICATIONS_CHANNEL = pipelineParameters.SLACK_NOTIFICATIONS_CHANNEL
-    env.JENKINS_NODE = pipelineParameters.JENKINS_NODE
-    env.DOCKER_REGISTRY_AUTH = pipelineParameters.DOCKER_REGISTRY_AUTH
+    // Environment variables used by signalen global Jenkins methods defined in /vars
+    env.SLACK_NOTIFICATIONS_ENABLED = settings.SLACK_NOTIFICATIONS_ENABLED
+    env.SLACK_NOTIFICATIONS_CHANNEL = settings.SLACK_NOTIFICATIONS_CHANNEL
+    env.DOCKER_REGISTRY_AUTH = settings.DOCKER_REGISTRY_AUTH
 
-    GIT_REFS = "signalen: ${pipelineParameters.SIGNALEN_BRANCH}, signals-frontend: ${pipelineParameters.SIGNALS_FRONTEND_BRANCH}"
+    // Used for logging purposes
+    GIT_REFS = "signalen: ${settings.SIGNALEN_BRANCH}, signals-frontend: ${settings.SIGNALS_FRONTEND_BRANCH}"
 
     log.info('🐵 starting declarative pipeline 🐵')
   }
@@ -48,7 +49,9 @@ def call(body) {
   // Declarative pipeline ---------------------------------------------------------------------------------------------
 
   pipeline {
-    agent any
+    agent {
+      node { label settings.JENKINS_NODE }
+    }
 
     triggers {
       githubPush() // listen for GitHub webhooks
@@ -77,15 +80,15 @@ def call(body) {
         steps {
           script {
             utils.checkoutWorkspace(
-              pipelineParameters.JENKINS_GITHUB_CREDENTIALS_ID,
+              settings.JENKINS_GITHUB_CREDENTIALS_ID,
               REPOSITORIES.signalen,
-              pipelineParameters.SIGNALEN_BRANCH
+              settings.SIGNALEN_BRANCH
             )
 
             utils.checkoutWorkspace(
-              pipelineParameters.JENKINS_GITHUB_CREDENTIALS_ID,
+              settings.JENKINS_GITHUB_CREDENTIALS_ID,
               REPOSITORIES.signalsFrontend,
-              pipelineParameters.SIGNALS_FRONTEND_BRANCH
+              settings.SIGNALS_FRONTEND_BRANCH
             )
           }
         }
@@ -95,8 +98,7 @@ def call(body) {
         steps {
           script {
             // log.warning('validate has been disabled for development purposes')
-            // signalen.validateDomainSchemas(pipelineParameters.ENVIRONMENT, signalen.getDomains(), '../signals-frontend', GIT_REFS)
-            signalen.validateDomainSchemas(pipelineParameters.ENVIRONMENT, pipelineParameters.DOMAINS, '../signals-frontend', GIT_REFS)
+            signalen.validateDomainSchemas(settings.ENVIRONMENT, settings.DOMAINS, '../signals-frontend', GIT_REFS)
           }
         }
       }
@@ -104,12 +106,12 @@ def call(body) {
       stage('Build `signals-frontend` Base Image') {
         steps {
           script {
-            // log.warning('buildAndPushSignalsFrontendDockerImage has been disabled for development purposes')
+            log.warning('buildAndPushSignalsFrontendDockerImage has been disabled for development purposes')
 
-            signalen.buildAndPushSignalsFrontendDockerImage(
-              pipelineParameters.SIGNALS_FRONTEND_BRANCH,
-              'signals-frontend'
-            )
+            // signalen.buildAndPushSignalsFrontendDockerImage(
+            //   settings.SIGNALS_FRONTEND_BRANCH,
+            //   'signals-frontend'
+            // )
           }
         }
       }
@@ -117,14 +119,14 @@ def call(body) {
       stage ('Build Domain Images') {
         steps {
           script {
-            // log.warning('buildAndPushDockerDomainImages has been disabled for development purposes')
+            log.warning('buildAndPushDockerDomainImages has been disabled for development purposes')
 
-            signalen.buildAndPushDockerDomainImages(
-              pipelineParameters.DOCKER_BUILD_ARG_REGISTRY_HOST,
-              pipelineParameters.ENVIRONMENT,
-              pipelineParameters.DOMAINS,
-              GIT_REFS
-            )
+            // signalen.buildAndPushDockerDomainImages(
+            //   settings.DOCKER_BUILD_ARG_REGISTRY_HOST,
+            //   settings.ENVIRONMENT,
+            //   settings.DOMAINS,
+            //   GIT_REFS
+            // )
           }
         }
       }
@@ -133,7 +135,7 @@ def call(body) {
         steps {
           script {
             log.warning('deployDomains has been disabled for development purposes')
-            // signalen.deployDomains('acceptance', pipelineParameters.DOMAINS, GIT_REFS)
+            // signalen.deployDomains('acceptance', settings.DOMAINS, GIT_REFS)
           }
         }
       }

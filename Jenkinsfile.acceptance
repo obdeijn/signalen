@@ -1,3 +1,37 @@
+/*
+
+Example for local development:
+
+signalenAcceptancePipeline {
+  ENVIRONMENT = 'acceptance'
+  SIGNALEN_BRANCH = 'master'
+  SIGNALS_FRONTEND_BRANCH = 'master'
+  JENKINS_GITHUB_CREDENTIALS_ID = '431d5971-5b08-46d8-b225-74368ee31ec0'
+  SIGNALEN_REPOSITORY = 'jpoppe/signalen'
+  SIGNALS_FRONTEND_REPOSITORY = 'jpoppe/signals-frontend'
+  DOCKER_BUILD_ARG_REGISTRY_HOST = 'localhost:5000'
+  SLACK_NOTIFICATIONS_ENABLED = false
+  SLACK_NOTIFICATIONS_CHANNEL = '#ci-signalen'
+  JENKINS_NODE = 'master'
+  DOCKER_REGISTRY_AUTH = ''
+  DOMAINS = ['weesp', 'amsterdam', 'amsterdamsebos']
+}
+
+*/
+
 @Library('signalen@master') _
 
-signalenAcceptancePipeline { }
+signalenAcceptancePipeline {
+  ENVIRONMENT = 'acceptance' // Deploy environment
+  SIGNALEN_BRANCH = 'master' // Signalen branch which to built
+  SIGNALS_FRONTEND_BRANCH = 'develop' // Signals-frontend branch to built
+  JENKINS_GITHUB_CREDENTIALS_ID = '5b5e63e2-8db7-48c7-8e14-41cbd10eeb4a' // Global Jenkins ID with Github token
+  SIGNALEN_REPOSITORY = 'Amsterdam/signalen' // The signalen mono repository
+  SIGNALS_FRONTEND_REPOSITORY = 'Amsterdam/signals-frontend' // The front-end repository
+  DOCKER_BUILD_ARG_REGISTRY_HOST = DOCKER_REGISTRY_HOST // Used for local Jenkins development, DOCKER_REGISTRY_HOST is a Jenkins global
+  SLACK_NOTIFICATIONS_ENABLED = false // Enable or disable Slack notifications
+  SLACK_NOTIFICATIONS_CHANNEL = '#ci-signalen' // Build events will be posted to this channel
+  JENKINS_NODE = 'BS16 || BS17' // Jenkins client which will run this pipeline
+  DOCKER_REGISTRY_AUTH = docker_registry_auth // docker_registry_auth is a global Jenkins variable
+  DOMAINS = ['weesp', 'amsterdam', 'amsterdamsebos'] // Front-end domains to build and deploy
+}
