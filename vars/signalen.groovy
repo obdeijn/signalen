@@ -130,7 +130,7 @@ def deployDomain(String dockerImageTag, String domain, String repositoryRefs) {
   }
 }
 
-def deployDomains(String environment, String[] domains, String gitRefs) {
+def deployDomains(String environment, def domains, String gitRefs) {
   log.console("deploying ${domains.join(', ')} to environment ${environment}")
 
   def steps = [:]
