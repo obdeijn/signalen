@@ -13,12 +13,12 @@ def _sendSlackMessage(def message, String color) {
 
   slackMessage += "\n${message}"
 
-  if (env.SLACK_NOTIFICATIONS_ENABLED == true) {
+  // if (env.SLACK_NOTIFICATIONS_ENABLED == true) {
     slackSend message: slackMessage, channel: env.SLACK_NOTIFICATIONS_CHANNEL, color: color
     return
-  }
+  // }
 
-  warning("Slack notifications are disabled, message: ${message}")
+  // warning("Slack notifications are disabled, message: ${message}")
 }
 
 def _formatMessage(Map message) {
