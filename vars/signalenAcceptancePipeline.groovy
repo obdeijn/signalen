@@ -106,12 +106,12 @@ def call(body) {
       stage('Build `signals-frontend` Base Image') {
         steps {
           script {
-            log.warning('buildAndPushSignalsFrontendDockerImage has been disabled for development purposes')
+            // log.warning('buildAndPushSignalsFrontendDockerImage has been disabled for development purposes')
 
-            // signalen.buildAndPushSignalsFrontendDockerImage(
-            //   settings.SIGNALS_FRONTEND_BRANCH,
-            //   'signals-frontend'
-            // )
+            signalen.buildAndPushSignalsFrontendDockerImage(
+              settings.SIGNALS_FRONTEND_BRANCH,
+              'signals-frontend'
+            )
           }
         }
       }
@@ -121,12 +121,12 @@ def call(body) {
           script {
             log.warning('buildAndPushDockerDomainImages has been disabled for development purposes')
 
-            // signalen.buildAndPushDockerDomainImages(
-            //   settings.DOCKER_BUILD_ARG_REGISTRY_HOST,
-            //   settings.ENVIRONMENT,
-            //   settings.DOMAINS,
-            //   GIT_REFS
-            // )
+            signalen.buildAndPushDockerDomainImages(
+              settings.DOCKER_BUILD_ARG_REGISTRY_HOST,
+              settings.ENVIRONMENT,
+              settings.DOMAINS,
+              GIT_REFS
+            )
           }
         }
       }
