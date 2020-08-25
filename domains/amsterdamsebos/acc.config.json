@@ -5,7 +5,8 @@
     "favicon": "/favicon.png",
     "iosIcon": "/icon_180x180.png",
     "statusBarStyle": "default",
-    "themeColor": "#ec0000"
+    "themeColor": "#ec0000",
+    "validation-fail-test": "removeme"
   },
   "logo": {
     "url": null,
