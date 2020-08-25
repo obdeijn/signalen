@@ -147,12 +147,12 @@ def validateSchema(String environment, String domain, String signalsFrontendPath
 
   nodejs(nodeJSInstallationName: 'node12') {
     dir("${env.WORKSPACE}/signalen") {
-      try {
-        sh "make validate-local-schema DOMAIN=${domain} ENVIRONMENT=${environment} SIGNALS_FRONTEND_PATH=${signalsFrontendPath}"
-      } catch (Throwable throwable) {
-        log.error("schema validation failed: ${domain} ${environment}")
-        throw throwable
-      }
+      // try {
+      sh "make validate-local-schema DOMAIN=${domain} ENVIRONMENT=${environment} SIGNALS_FRONTEND_PATH=${signalsFrontendPath}"
+      // } catch (Throwable throwable) {
+      //   log.error("schema validation failed: ${domain} ${environment}")
+      //   throw throwable
+      // }
     }
   }
 }
