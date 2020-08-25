@@ -119,7 +119,7 @@ def call(body) {
       stage ('Build Domain Images') {
         steps {
           script {
-            log.warning('buildAndPushDockerDomainImages has been disabled for development purposes')
+            // log.warning('buildAndPushDockerDomainImages has been disabled for development purposes')
 
             signalen.buildAndPushDockerDomainImages(
               settings.DOCKER_BUILD_ARG_REGISTRY_HOST,
@@ -134,8 +134,9 @@ def call(body) {
       stage('Deploy Domains') {
         steps {
           script {
-            log.warning('deployDomains has been disabled for development purposes')
-            // signalen.deployDomains('acceptance', settings.DOMAINS, GIT_REFS)
+            // log.warning('deployDomains has been disabled for development purposes')
+
+            signalen.deployDomains('acceptance', settings.DOMAINS, GIT_REFS)
           }
         }
       }
