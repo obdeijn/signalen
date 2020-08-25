@@ -44,8 +44,6 @@ def console(message, color, tag) {
 
 def console(message, color) { echo(String.format("%s%s%s", color.xterm_code, message, '\u001B[0m')) }
 
-// def console(message, color) { echo(String.format("%s%s%s", color.xterm_code, _formatMessage(message), '\u001B[0m')) }
-
 def console(message) { console(message, Colors.CYAN) }
 
 def highlight(message) { console(message, Colors.PURPLE) }
