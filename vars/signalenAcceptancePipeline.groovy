@@ -62,7 +62,7 @@ def call(body) {
       durabilityHint('PERFORMANCE_OPTIMIZED') // tweaking Jenkins build strategy
       ansiColor('xterm') // enable colorized logging
       timeout(unit: 'MINUTES', time: 30) // cancel job if it runs longer then 30 minutes
-      timestamps() // show timestamps in console log
+      // timestamps() // show timestamps in console log
       disableConcurrentBuilds() // prevent this pipeline from running simutanously
     }
 
