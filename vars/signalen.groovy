@@ -30,8 +30,14 @@ def logBuildInformation(String[] domains, String dockerBuildArgRegistryHost) {
   log.separator()
 }
 
-def buildAndPushDockerImage(String dockerBuildArgRegistryHost, String environment, String domain, String repositoryRefs) {
-  log.console("build domain image ${environment} ${domain}")
+def _buildAndPushDockerImage(
+  String dockerBuildArgRegistryHost,
+  String environment,
+  String domain,
+  String repositoryRefs
+) {
+  log.console("building ${domain} ${environment} domain image: ${repositoryRefs}")
+  log.console("dockerBuildArgRegistryHost:, ${dockerBuildArgRegistryHost}")
 
   def environmentAbbreviations = [acceptance: 'acc', production: 'prod']
 
@@ -68,6 +74,7 @@ def pushImageToDockerRegistry(def image, String tag) {
 
 def buildAndPushSignalsFrontendDockerImage(String signalsFrontendGitRef, String signalsFrontendPath = '') {
   log.console("building signals-frontend @ ${signalsFrontendGitRef}")
+  log.console("${env.DOCKER_REGISTRY_HOST} ${env.DOCKER_REGISTRY_AUTH}")
 
   try {
     docker.withRegistry(env.DOCKER_REGISTRY_HOST, env.DOCKER_REGISTRY_AUTH) {
@@ -90,11 +97,16 @@ def buildAndPushSignalsFrontendDockerImage(String signalsFrontendGitRef, String 
   }
 }
 
-def buildAndPushDockerDomainImages(String dockerRegistry, String environment, String[] domains, String repositoryRefs) {
+def buildAndPushDockerDomainImages(
+  String dockerBuildArgRegistryHost,
+  String environment,
+  def domains,
+  String repositoryRefs
+) {
   def steps = [:]
 
   domains.each {domain -> steps["BUILD_IMAGE_${domain}_${environment}".toUpperCase()] = {
-    buildAndPushDockerImage dockerRegistry, environment, domain, repositoryRefs
+    _buildAndPushDockerImage dockerBuildArgRegistryHost, environment, domain, repositoryRefs
   }}
 
   parallel steps
@@ -145,7 +157,7 @@ def validateSchema(String environment, String domain, String signalsFrontendPath
   }
 }
 
-def validateDomainSchemas(String environment, String[] domains, String signalsFrontendPath, String releaseRefs) {
+def validateDomainSchemas(String environment, def domains, String signalsFrontendPath, String releaseRefs) {
   log.console("Validate ${environment} schema's: ${domains.join(', ')}")
 
   def steps = [:]

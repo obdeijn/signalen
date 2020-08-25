@@ -13,7 +13,7 @@ def _sendSlackMessage(def message, String color) {
 
   slackMessage += "\n${message}"
 
-  if (env.SLACK_NOTIFICATIONS_ENABLED) {
+  if (env.SLACK_NOTIFICATIONS_ENABLED == true) {
     slackSend message: slackMessage, channel: env.SLACK_NOTIFICATIONS_CHANNEL, color: color
     return
   }

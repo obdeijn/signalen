@@ -1,30 +1,7 @@
 def call(body) {
   // Pre pipeline script block ----------------------------------------------------------------------------------------
 
-  env.DEVELOPMENT = true
-  env.SLACK_NOTIFICATIONS_ENABLED = !env.DEVELOPMENT
-  env.SLACK_NOTIFICATIONS_CHANNEL = '#ci-signalen'
-  JENKINS_NODE = env.DEVELOPMENT ? 'master' : 'BS16 || BS17'
-  DOCKER_REGISTRY_AUTH = env.DEVELOPMENT ? null : 'docker_registry_auth'
-
-  SIGNALEN_REPOSITORY = 'jpoppe/signalen'
-  SIGNALS_FRONTEND_REPOSITORY = 'jpoppe/signals-frontend'
-  JENKINS_GITHUB_CREDENTIALS_ID = '431d5971-5b08-46d8-b225-74368ee31ec0'
-  DOCKER_BUILD_ARG_REGISTRY_HOST = DOCKER_REGISTRY_HOST_SHORT
-
-  REPOSITORIES = [
-    signalen: [
-      name: 'signalen',
-      repositoryUrl: "https://github.com/${SIGNALEN_REPOSITORY}.git"
-    ],
-    signalsFrontend: [
-      name: 'signals-frontend',
-      buildPath: '.',
-      repositoryUrl: "https://github.com/${SIGNALS_FRONTEND_REPOSITORY}.git"
-    ]
-  ]
-
-  String gitRefs = ''
+  String GIT_REFS = ''
 
   def pipelineParameters= [:]
 
@@ -47,6 +24,24 @@ def call(body) {
     log.info('pipeline parameters:')
     log.highlight(pipelineParameters)
 
+    REPOSITORIES = [
+      signalen: [
+        name: 'signalen',
+        repositoryUrl: "https://github.com/${pipelineParameters.SIGNALEN_REPOSITORY}.git"
+      ],
+      signalsFrontend: [
+        name: 'signals-frontend',
+        repositoryUrl: "https://github.com/${pipelineParameters.SIGNALS_FRONTEND_REPOSITORY}.git"
+      ]
+    ]
+
+    env.SLACK_NOTIFICATIONS_ENABLED = pipelineParameters.SLACK_NOTIFICATIONS_ENABLED
+    env.SLACK_NOTIFICATIONS_CHANNEL = pipelineParameters.SLACK_NOTIFICATIONS_CHANNEL
+    env.JENKINS_NODE = pipelineParameters.JENKINS_NODE
+    env.DOCKER_REGISTRY_AUTH = pipelineParameters.DOCKER_REGISTRY_AUTH
+
+    GIT_REFS = "signalen: ${pipelineParameters.SIGNALEN_BRANCH}, signals-frontend: ${pipelineParameters.SIGNALS_FRONTEND_BRANCH}"
+
     log.info('🐵 starting declarative pipeline 🐵')
   }
 
@@ -55,116 +50,96 @@ def call(body) {
   pipeline {
     agent any
 
+    triggers {
+      githubPush() // listen for GitHub webhooks
+      pollSCM('*/30 * * * *') // poll every 30 minutes for repository changes (fallback for Github webhooks)
+    }
+
     options {
-      buildDiscarder(logRotator(numToKeepStr: '5'))
-      timeout(unit: 'MINUTES', time: 30)
-      ansiColor('xterm')
-      timestamps()
+      durabilityHint('PERFORMANCE_OPTIMIZED') // tweaking Jenkins build strategy
+      ansiColor('xterm') // enable colorized logging
+      timeout(unit: 'MINUTES', time: 30) // cancel job if it runs longer then 30 minutes
+      timestamps() // show timestamps in console log
+      disableConcurrentBuilds() // prevent this pipeline from running simutanously
     }
 
     parameters {
-      choice(
-        description: 'build and deploy a single domain instead of all domains',
-        name: 'DOMAIN',
-        choices: ['', 'weesp', 'amsterdam', 'amsterdamsebos']
-      )
-      gitParameter(
-        name: "SIGNALEN_BRANCH",
-        description: 'signalen Git repository branch',
-        defaultValue: 'origin/master',
-        useRepository: 'signalen',
-        tagFilter: 'v[0-9]*.[0-9]*.[0-9]*',
-        branchFilter: '*',
-        quickFilterEnabled: false,
-        selectedValue: 'DEFAULT',
-        sortMode: 'DESCENDING_SMART',
-        type: 'PT_BRANCH_TAG'
-      )
-      booleanParam(defaultValue: false, description: 'clean workspace before build', name: "CLEAN_WORKSPACE")
+      booleanParam(defaultValue: false, description: 'clean workspace before build', name: 'CLEAN_WORKSPACE')
     }
 
     stages {
-      stage('cleaning workspace') {
+      stage('Clean Workspaces') {
         when { expression { params.CLEAN_WORKSPACE } }
-        steps {
-            script {
-              log.info('cleaning workspace folders')
-              // cleanWs()
-            }
-        }
-
+        steps { cleanWorkspaces() }
       }
 
-      stage('checkout signalen') {
+      stage('Checkout Repositories') {
         steps {
           script {
-            gitRefs = "signalen: ${params.SIGNALEN_BRANCH}, signals-frontend: ${BRANCH_NAME}"
-            log.info('🌈 checking out the signalen repository 🌈')
+            utils.checkoutWorkspace(
+              pipelineParameters.JENKINS_GITHUB_CREDENTIALS_ID,
+              REPOSITORIES.signalen,
+              pipelineParameters.SIGNALEN_BRANCH
+            )
 
-            utils.checkoutWorkspace(JENKINS_GITHUB_CREDENTIALS_ID, REPOSITORIES.signalen, params.SIGNALEN_BRANCH)
-            // git branch: pipelineParameters.branch, credentialsId: 'GitCredentials', url: pipelineParameters.scmUrl
-
-            log.info("multibranch branch name: ${BRANCH_NAME}")
-            signalen.logBuildInformation(signalen.getDomains(), DOCKER_BUILD_ARG_REGISTRY_HOST)
-            def globalVariables = getBinding().getVariables()
-            for (variable in getBinding().getVariables()) echo "${variable} " + globalVariables.get(variable)
-          }
-        }
-      }
-
-      stage('validate') {
-        steps {
-          script {
-            signalen.validateDomainSchemas('acceptance', signalen.getDomains(), '..', gitRefs)
-            signalen.validateDomainSchemas('production', signalen.getDomains(), '..', gitRefs)
-          }
-        }
-      }
-
-      stage('build signals-frontend') {
-        steps {
-          script {
-            signalen.buildAndPushSignalsFrontendDockerImage(BRANCH_NAME, REPOSITORIES.signalsFrontend.buildPath)
-          }
-        }
-      }
-
-      stage ('build domain images') {
-        steps {
-          script {
-            signalen.buildAndPushDockerDomainImages(
-              DOCKER_BUILD_ARG_REGISTRY_HOST,
-              'acceptance',
-              signalen.getDomains(),
-              gitRefs
+            utils.checkoutWorkspace(
+              pipelineParameters.JENKINS_GITHUB_CREDENTIALS_ID,
+              REPOSITORIES.signalsFrontend,
+              pipelineParameters.SIGNALS_FRONTEND_BRANCH
             )
           }
-
-          // parallel (
-          //   "unit tests": { sh 'mvn test' },
-          //   "integration tests": { sh 'mvn integration-test' }
-          // )
         }
       }
 
-      stage('deploy domains'){
+      stage('Validate Domain Schema\'s') {
         steps {
           script {
-            signalen.deployDomains('acceptance', signalen.getDomains(), gitRefs)
+            // log.warning('validate has been disabled for development purposes')
+            // signalen.validateDomainSchemas(pipelineParameters.ENVIRONMENT, signalen.getDomains(), '../signals-frontend', GIT_REFS)
+            signalen.validateDomainSchemas(pipelineParameters.ENVIRONMENT, pipelineParameters.DOMAINS, '../signals-frontend', GIT_REFS)
+          }
+        }
+      }
+
+      stage('Build `signals-frontend` Base Image') {
+        steps {
+          script {
+            // log.warning('buildAndPushSignalsFrontendDockerImage has been disabled for development purposes')
+
+            signalen.buildAndPushSignalsFrontendDockerImage(
+              pipelineParameters.SIGNALS_FRONTEND_BRANCH,
+              'signals-frontend'
+            )
+          }
+        }
+      }
+
+      stage ('Build Domain Images') {
+        steps {
+          script {
+            // log.warning('buildAndPushDockerDomainImages has been disabled for development purposes')
+
+            signalen.buildAndPushDockerDomainImages(
+              pipelineParameters.DOCKER_BUILD_ARG_REGISTRY_HOST,
+              pipelineParameters.ENVIRONMENT,
+              pipelineParameters.DOMAINS,
+              GIT_REFS
+            )
+          }
+        }
+      }
+
+      stage('Deploy Domains') {
+        steps {
+          script {
+            log.warning('deployDomains has been disabled for development purposes')
+            // signalen.deployDomains('acceptance', pipelineParameters.DOMAINS, GIT_REFS)
           }
         }
       }
     }
 
     post {
-      success {
-        script { log.info("pipeline success: ${env.BUILD_URL}}") }
-      }
-
-      changed {
-        script { log.info("status changed: [From: $currentBuild.previousBuild.result, To: $currentBuild.result]") }
-      }
-
       always {
         script {
           def result = currentBuild.result
@@ -172,8 +147,16 @@ def call(body) {
         }
       }
 
+      changed {
+        script { log.notify("status changed: [From: $currentBuild.previousBuild.result, To: $currentBuild.result]") }
+      }
+
+      success {
+        script { log.notify("pipeline success: ${env.BUILD_URL}}") }
+      }
+
       failure {
-        script { log.error("pipeline failure: ${env.BUILD_URL}") }
+        script { log.notifyError("pipeline failure: ${env.BUILD_URL}") }
       }
     }
   }
