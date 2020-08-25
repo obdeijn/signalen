@@ -157,13 +157,13 @@ def call(body) {
 
       success {
         script {
-          log.notify("`acceptance pipeline` success: ${env.BUILD_URL}}, ${gitRefs}, domains: ${settings.DOMAINS.join(', ')}")
+          log.notify("`acceptance pipeline` success: ${env.BUILD_URL}}, ${GIT_REFS}, domains: ${settings.DOMAINS.join(', ')}")
         }
       }
 
       failure {
         script {
-          log.notifyError("`acceptance pipeline` failure: ${env.BUILD_URL}, ${gitRefs}, domains: ${settings.DOMAINS.join(', ')}")
+          log.notifyError("`acceptance pipeline` failure: ${env.BUILD_URL}, ${GIT_REFS}, domains: ${settings.DOMAINS.join(', ')}")
         }
       }
     }
