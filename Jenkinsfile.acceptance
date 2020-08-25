@@ -23,7 +23,7 @@ signalenAcceptancePipeline {
 
 signalenAcceptancePipeline {
   ENVIRONMENT = 'acceptance' // Deploy environment
-  SIGNALEN_BRANCH = 'master' // Signalen branch which to built
+  SIGNALEN_BRANCH = 'develop' // Signalen branch which to built
   SIGNALS_FRONTEND_BRANCH = 'develop' // Signals-frontend branch to built
   JENKINS_GITHUB_CREDENTIALS_ID = '5b5e63e2-8db7-48c7-8e14-41cbd10eeb4a' // Global Jenkins ID with Github token
   SIGNALEN_REPOSITORY = 'Amsterdam/signalen' // The signalen mono repository
