@@ -150,15 +150,21 @@ def call(body) {
       }
 
       changed {
-        script { log.notify("status changed: [From: $currentBuild.previousBuild.result, To: $currentBuild.result]") }
+        script {
+          log.info("status changed: [From: ${currentBuild.previousBuild.result}, To: ${currentBuild.result}]")
+        }
       }
 
       success {
-        script { log.notify("pipeline success: ${env.BUILD_URL}}") }
+        script {
+          log.notify("`acceptance pipeline` success: ${env.BUILD_URL}}, ${gitRefs}, domains: ${settings.DOMAINS.join(', ')}")
+        }
       }
 
       failure {
-        script { log.notifyError("pipeline failure: ${env.BUILD_URL}") }
+        script {
+          log.notifyError("`acceptance pipeline` failure: ${env.BUILD_URL}, ${gitRefs}, domains: ${settings.DOMAINS.join(', ')}")
+        }
       }
     }
   }
