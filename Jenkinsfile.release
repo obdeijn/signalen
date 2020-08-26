@@ -1,113 +1,30 @@
-#!/usr/bin/env groovy
+/*
+
+Example for local development:
+
+signalenAcceptancePipeline {
+  JENKINS_GITHUB_CREDENTIALS_ID = '431d5971-5b08-46d8-b225-74368ee31ec0'
+  SIGNALEN_REPOSITORY = 'jpoppe/signalen'
+  SIGNALS_FRONTEND_REPOSITORY = 'jpoppe/signals-frontend'
+  DOCKER_BUILD_ARG_REGISTRY_HOST = 'localhost:5000'
+  SLACK_NOTIFICATIONS_CHANNEL = ''
+  JENKINS_NODE = 'master'
+  DOCKER_REGISTRY_AUTH = ''
+  DOMAINS = ['weesp', 'amsterdam', 'amsterdamsebos']
+}
+
+*/
 
 @Library('signalen@master') _
 
-// -- Development Options ---------------------------------------------------------------------------------------------
-
-env.DEVELOPMENT = false
-env.SLACK_NOTIFICATIONS_ENABLED = !env.DEVELOPMENT
-env.SLACK_NOTIFICATIONS_CHANNEL = '#ci-signalen'
-JENKINS_NODE = env.DEVELOPMENT ? 'master' : 'BS16 || BS17'
-DOCKER_REGISTRY_AUTH = env.DEVELOPMENT ? null : 'docker_registry_auth'
-
-SIGNALEN_REPOSITORY = 'Amsterdam/signalen'
-SIGNALS_FRONTEND_REPOSITORY = 'Amsterdam/signals-frontend'
-JENKINS_GITHUB_CREDENTIALS_ID = '5b5e63e2-8db7-48c7-8e14-41cbd10eeb4a'
-DOCKER_BUILD_ARG_REGISTRY_HOST = DOCKER_REGISTRY_HOST
-
-// -- Other Globals ---------------------------------------------------------------------------------------------------
-
-INFO_HEADER = '''
-     _                   _                       _
- ___(_) __ _ _ __   __ _| | ___ _ __    _ __ ___| | ___  __ _ ___  ___
-/ __| |/ _` | '_ \\ / _` | |/ _ \\ '_ \\  | '__/ _ \\ |/ _ \\/ _` / __|/ _ \\
-\\__ \\ | (_| | | | | (_| | |  __/ | | | | | |  __/ |  __/ (_| \\__ \\  __/
-|___/_|\\__, |_| |_|\\__,_|_|\\___|_| |_| |_|  \\___|_|\\___|\\__,_|___/\\___|
-       |___/
-'''
-
-WORKSPACES = [
-  signalen: [
-    releaseTagParamName: 'SIGNALEN_RELEASE_TAG',
-    name: 'signalen',
-    repository: SIGNALEN_REPOSITORY,
-    repositoryUrl: "https://github.com/${SIGNALEN_REPOSITORY}.git"
-  ],
-  signalsFrontend: [
-    releaseTagParamName: 'SIGNALS_FRONTEND_RELEASE_TAG',
-    name: 'signals-frontend',
-    repository: SIGNALS_FRONTEND_REPOSITORY,
-    repositoryUrl: "https://github.com/${SIGNALS_FRONTEND_REPOSITORY}.git"
-  ],
-]
-
-// -- Pipeline script -------------------------------------------------------------------------------------------------
-
-ansiColor('xterm') {
-  node(JENKINS_NODE) {
-    log.highlight(INFO_HEADER)
-
-    String releaseRefs = "signalen: ${params.SIGNALEN_RELEASE_TAG}, signals-frontend: ${params.SIGNALS_FRONTEND_RELEASE_TAG}"
-
-    if (params.CLEAN_WORKSPACE) {
-      log.info('cleaning workspace folders')
-      cleanWs()
-    }
-
-    WORKSPACES.each { _workspaceName, workspace -> utils.checkoutWorkspace(JENKINS_GITHUB_CREDENTIALS_ID, workspace) }
-
-    properties([
-      durabilityHint('PERFORMANCE_OPTIMIZED'),
-      parameters([
-        utils.separatorParameter('Build parameters'),
-        utils.semanticGitReleaseTagParameter('signals-frontend'),
-        utils.semanticGitReleaseTagParameter('signalen'),
-        utils.separatorParameter('Debug and maintenance parameters'),
-        booleanParam(
-          name: 'CLEAN_WORKSPACE',
-          description: 'clean workspace before the building process starts',
-          defaultValue: false
-        ),
-        choice(
-          description: 'build and deploy a single domain instead of all domains',
-          name: 'DOMAIN',
-          choices: ['', 'amsterdam', 'amsterdamsebos', 'weesp']
-        ),
-        choice(description: 'target environment', name: 'ENVIRONMENT', choices: ['production', 'acceptance'])
-      ])
-    ])
-
-    String[] targetDomains = params.DOMAIN ? [params.DOMAIN] : signalen.getDomains()
-
-    log.notify("starting `${params.ENVIRONMENT}` release - ${releaseRefs} | domains: ${targetDomains.join(', ')}")
-
-    signalen.logBuildInformation(targetDomains, DOCKER_BUILD_ARG_REGISTRY_HOST)
-
-    stage('Checkout workspaces') {
-      WORKSPACES.each { _workspaceName, workspace ->
-        utils.checkoutWorkspace(JENKINS_GITHUB_CREDENTIALS_ID, workspace, params[workspace.releaseTagParamName])
-      }
-    }
-
-    stage('Validate domain schema\'s') {
-      signalen.validateDomainSchemas(params.ENVIRONMENT, targetDomains, '../signals-frontend', releaseRefs)
-    }
-
-    stage('Build signals-frontend image') {
-      signalen.buildAndPushSignalsFrontendDockerImage(params.SIGNALS_FRONTEND_RELEASE_TAG, 'signals-frontend')
-    }
-
-    stage('Build domain images') {
-      signalen.buildAndPushDockerDomainImages(
-        DOCKER_BUILD_ARG_REGISTRY_HOST,
-        params.ENVIRONMENT,
-        targetDomains,
-        releaseRefs
-      )
-    }
-
-    stage('Deploy domains') { signalen.deployDomains(params.ENVIRONMENT, targetDomains, releaseRefs) }
-
-    log.notify("finished `${params.ENVIRONMENT}` release - ${releaseRefs} | domains: ${targetDomains.join(', ')}")
-  }
+signalenReleasePipeline {
+  JENKINS_GITHUB_CREDENTIALS_ID = '5b5e63e2-8db7-48c7-8e14-41cbd10eeb4a' // Global Jenkins Github secret token ID
+  SIGNALEN_REPOSITORY = 'Amsterdam/signalen' // The signalen mono repository
+  SIGNALS_FRONTEND_REPOSITORY = 'Amsterdam/signals-frontend' // The front-end repository
+  DOCKER_BUILD_ARG_REGISTRY_HOST = DOCKER_REGISTRY_HOST // Used for local Jenkins development, DOCKER_REGISTRY_HOST is a Jenkins global
+  SLACK_NOTIFICATIONS_CHANNEL = '#ci-signalen' // Build events will be posted to this channel
+  JENKINS_NODE = 'BS16 || BS17' // Jenkins client which will run this pipeline
+  DOCKER_REGISTRY_AUTH = 'docker_registry_auth' // docker_registry_auth is the ID of a global Jenkins secret
+  DOMAINS = ['amsterdamsebos'] // Front-end domains to build and deploy
+  // DOMAINS = ['weesp', 'amsterdam', 'amsterdamsebos'] // Front-end domains to build and deploy
 }

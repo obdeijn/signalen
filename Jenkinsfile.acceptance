@@ -10,8 +10,7 @@ signalenAcceptancePipeline {
   SIGNALEN_REPOSITORY = 'jpoppe/signalen'
   SIGNALS_FRONTEND_REPOSITORY = 'jpoppe/signals-frontend'
   DOCKER_BUILD_ARG_REGISTRY_HOST = 'localhost:5000'
-  SLACK_NOTIFICATIONS_ENABLED = false
-  SLACK_NOTIFICATIONS_CHANNEL = '#ci-signalen'
+  SLACK_NOTIFICATIONS_CHANNEL = ''
   JENKINS_NODE = 'master'
   DOCKER_REGISTRY_AUTH = ''
   DOMAINS = ['weesp', 'amsterdam', 'amsterdamsebos']
@@ -29,7 +28,6 @@ signalenAcceptancePipeline {
   SIGNALEN_REPOSITORY = 'Amsterdam/signalen' // The signalen mono repository
   SIGNALS_FRONTEND_REPOSITORY = 'Amsterdam/signals-frontend' // The front-end repository
   DOCKER_BUILD_ARG_REGISTRY_HOST = DOCKER_REGISTRY_HOST // Used for local Jenkins development, DOCKER_REGISTRY_HOST is a Jenkins global
-  SLACK_NOTIFICATIONS_ENABLED = true // Enable or disable Slack notifications
   SLACK_NOTIFICATIONS_CHANNEL = '#ci-signalen' // Build events will be posted to this channel
   JENKINS_NODE = 'BS16 || BS17' // Jenkins client which will run this pipeline
   DOCKER_REGISTRY_AUTH = 'docker_registry_auth' // docker_registry_auth is the ID of a global Jenkins secret
