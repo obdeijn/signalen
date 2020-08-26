@@ -33,7 +33,6 @@ def call(Closure body) {
       ansiColor('xterm') // enable colorized logging
       timeout(unit: 'MINUTES', time: 30) // cancel job if it runs longer then 30 minutes
       disableConcurrentBuilds() // prevent this pipeline from running simutanously
-      // timestamps() // show timestamps in console log
     }
 
     parameters {
@@ -79,7 +78,7 @@ def call(Closure body) {
       choice(
         description: 'build and deploy a single domain instead of all domains',
         name: 'DOMAIN',
-        choices: ['', 'weesp', 'amsterdam', 'amsterdamsebos']
+        choices: ([''] << pipelineParameters.DOMAINS).flatten
       )
 
       choice(description: 'target environment', name: 'ENVIRONMENT', choices: ['acceptance', 'production'])
@@ -123,8 +122,8 @@ def call(Closure body) {
 
       stage('Deploy Domains') {
         steps {
-          script { log.warning('deployDomains has been disabled for development purposes') }
-          // deployDomains(params.ENVIRONMENT, targetDomains)
+          // script { log.warning('deployDomains has been disabled for development purposes') }
+          deployDomains(params.ENVIRONMENT, targetDomains)
         }
       }
     }
