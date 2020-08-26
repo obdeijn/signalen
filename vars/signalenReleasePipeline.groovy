@@ -78,7 +78,7 @@ def call(Closure body) {
       choice(
         description: 'build and deploy a single domain instead of all domains',
         name: 'DOMAIN',
-        choices: ([''] << pipelineParameters.DOMAINS).flatten
+        choices: ['', 'weesp', 'amsterdam', 'amsterdamsebos']
       )
 
       choice(description: 'target environment', name: 'ENVIRONMENT', choices: ['acceptance', 'production'])
