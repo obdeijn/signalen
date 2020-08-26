@@ -13,12 +13,12 @@ def _sendSlackMessage(def message, String color) {
 
   slackMessage += "\n${message}"
 
-  // if (env.SLACK_NOTIFICATIONS_ENABLED == true) {
+  if (env.SLACK_NOTIFICATIONS_CHANNEL) {
     slackSend message: slackMessage, channel: env.SLACK_NOTIFICATIONS_CHANNEL, color: color
     return
-  // }
+  }
 
-  // warning("Slack notifications are disabled, message: ${message}")
+  warning("env.SLACK_NOTIFICATIONS_CHANNEL is empty, skipping notification: ${message}")
 }
 
 def _formatMessage(Map message) {
@@ -44,6 +44,8 @@ def console(message, color, tag) {
 
 def console(message, color) { echo(String.format("%s%s%s", color.xterm_code, message, '\u001B[0m')) }
 
+// def console(message, color) { echo(String.format("%s%s%s", color.xterm_code, _formatMessage(message), '\u001B[0m')) }
+
 def console(message) { console(message, Colors.CYAN) }
 
 def highlight(message) { console(message, Colors.PURPLE) }
@@ -53,8 +55,6 @@ def error(message) { console(message, Colors.RED, '[ERROR]') }
 def info(message) { console(message, Colors.GREEN) }
 
 def warning(message) { console(message, Colors.GREEN, '[WARNING]') }
-
-def separator() { console('**********************************************************') }
 
 def notify(def message) {
   info(message)

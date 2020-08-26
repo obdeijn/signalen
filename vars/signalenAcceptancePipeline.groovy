@@ -1,56 +1,29 @@
-def call(body) {
-  // Pre pipeline script block ----------------------------------------------------------------------------------------
+def call(Closure body) {
+  // Scripted pipeline scope ------------------------------------------------------------------------------------------
 
-  String GIT_REFS = ''
+  def pipelineParams = [:]
+  body.resolveStrategy = Closure.DELEGATE_FIRST
+  body.delegate = pipelineParams
+  body()
 
-  def settings = [:]
-
-  ansiColor('xterm') {
-    log.highlight('''
+  banner = '''
      _                   _                                       _
  ___(_) __ _ _ __   __ _| | ___ _ __     __ _  ___ ___ ___ _ __ | |_ __ _ _ __   ___ ___
 / __| |/ _` | '_ \\ / _` | |/ _ \\ '_ \\   / _` |/ __/ __/ _ \\ '_ \\| __/ _` | '_ \\ / __/ _ \\
 \\__ \\ | (_| | | | | (_| | |  __/ | | | | (_| | (_| (_|  __/ |_) | || (_| | | | | (_|  __/
 |___/_|\\__, |_| |_|\\__,_|_|\\___|_| |_|  \\__,_|\\___\\___\\___| .__/ \\__\\__,_|_| |_|\\___\\___|
        |___/                                               |_|
-    ''')
+  '''
 
-    log.info('🦄 we are now in the scripted "pre declarative" pipeline scope 🦄')
+  env.RELEASE_DESCRIPTION = "${pipelineParams.ENVIRONMENT} | signalen @ ${pipelineParams.SIGNALEN_BRANCH} | signals-frontend @ ${pipelineParams.SIGNALS_FRONTEND_BRANCH}"
 
-    body.resolveStrategy = Closure.DELEGATE_FIRST
-    body.delegate = settings
-    body()
-
-    log.info('pipeline parameters:')
-    log.highlight(settings)
-
-    REPOSITORIES = [
-      signalen: [
-        name: 'signalen',
-        repositoryUrl: "https://github.com/${settings.SIGNALEN_REPOSITORY}.git"
-      ],
-      signalsFrontend: [
-        name: 'signals-frontend',
-        repositoryUrl: "https://github.com/${settings.SIGNALS_FRONTEND_REPOSITORY}.git"
-      ]
-    ]
-
-    // Environment variables used by signalen global Jenkins methods defined in /vars
-    env.SLACK_NOTIFICATIONS_ENABLED = settings.SLACK_NOTIFICATIONS_ENABLED
-    env.SLACK_NOTIFICATIONS_CHANNEL = settings.SLACK_NOTIFICATIONS_CHANNEL
-    env.DOCKER_REGISTRY_AUTH = settings.DOCKER_REGISTRY_AUTH
-
-    // Used for logging purposes
-    GIT_REFS = "signalen: ${settings.SIGNALEN_BRANCH}, signals-frontend: ${settings.SIGNALS_FRONTEND_BRANCH}"
-
-    log.info('🐵 starting declarative pipeline 🐵')
-  }
+  signalen.initializePipeline(banner, pipelineParams, params)
 
   // Declarative pipeline ---------------------------------------------------------------------------------------------
 
   pipeline {
     agent {
-      node { label settings.JENKINS_NODE }
+      node { label pipelineParams.JENKINS_NODE }
     }
 
     triggers {
@@ -78,65 +51,40 @@ def call(body) {
 
       stage('Checkout Repositories') {
         steps {
-          script {
-            utils.checkoutWorkspace(
-              settings.JENKINS_GITHUB_CREDENTIALS_ID,
-              REPOSITORIES.signalen,
-              settings.SIGNALEN_BRANCH
-            )
+          checkoutGithubRepository('signalen', pipelineParams.SIGNALEN_REPOSITORY, pipelineParams.SIGNALEN_BRANCH)
 
-            utils.checkoutWorkspace(
-              settings.JENKINS_GITHUB_CREDENTIALS_ID,
-              REPOSITORIES.signalsFrontend,
-              settings.SIGNALS_FRONTEND_BRANCH
-            )
-          }
+          checkoutGithubRepository(
+            'signalen-frontend',
+            pipelineParams.SIGNALS_FRONTEND_REPOSITORY,
+            pipelineParams.SIGNALS_FRONTEND_BRANCH
+          )
         }
       }
 
       stage('Validate Domain Schema\'s') {
-        steps {
-          script {
-            signalen.validateDomainSchemas(settings.ENVIRONMENT, settings.DOMAINS, '../signals-frontend', GIT_REFS)
-          }
-        }
+        steps { validateDomainSchemas(pipelineParams.ENVIRONMENT, pipelineParams.DOMAINS) }
       }
 
       stage('Build `signals-frontend` Base Image') {
         steps {
-          script {
-            log.warning('buildAndPushSignalsFrontendDockerImage has been disabled for development purposes')
-
-            // signalen.buildAndPushSignalsFrontendDockerImage(
-            //   settings.SIGNALS_FRONTEND_BRANCH,
-            //   'signals-frontend'
-            // )
-          }
+          buildAndPushSignalsFrontendDockerImage(pipelineParams.SIGNALS_FRONTEND_BRANCH, 'signals-frontend')
         }
       }
 
       stage ('Build Domain Images') {
         steps {
-          script {
-            log.warning('buildAndPushDockerDomainImages has been disabled for development purposes')
-
-            // signalen.buildAndPushDockerDomainImages(
-            //   settings.DOCKER_BUILD_ARG_REGISTRY_HOST,
-            //   settings.ENVIRONMENT,
-            //   settings.DOMAINS,
-            //   GIT_REFS
-            // )
-          }
+          buildAndPushDockerDomainImages(
+            pipelineParams.DOCKER_BUILD_ARG_REGISTRY_HOST,
+            pipelineParams.ENVIRONMENT,
+            pipelineParams.DOMAINS,
+          )
         }
       }
 
       stage('Deploy Domains') {
         steps {
-          script {
-            log.warning('deployDomains has been disabled for development purposes')
-
-            // signalen.deployDomains('acceptance', settings.DOMAINS, GIT_REFS)
-          }
+          script { log.warning('deployDomains has been disabled for development purposes') }
+          // deployDomains('acceptance', pipelineParams.DOMAINS)
         }
       }
     }
@@ -157,13 +105,13 @@ def call(body) {
 
       success {
         script {
-          log.notify("`acceptance pipeline` success: ${env.BUILD_URL}}, ${GIT_REFS}, domains: ${settings.DOMAINS.join(', ')}")
+          log.notify("`acceptance pipeline` success: ${env.BUILD_URL}}, ${env.RELEASE_DESCRIPTION}, domains: ${pipelineParams.DOMAINS.join(', ')}")
         }
       }
 
       failure {
         script {
-          log.notifyError("`acceptance pipeline` failure: ${env.BUILD_URL}, ${GIT_REFS}, domains: ${settings.DOMAINS.join(', ')}")
+          log.notifyError("`acceptance pipeline` failure: ${env.BUILD_URL}, ${env.RELEASE_DESCRIPTION}, domains: ${pipelineParams.DOMAINS.join(', ')}")
         }
       }
     }

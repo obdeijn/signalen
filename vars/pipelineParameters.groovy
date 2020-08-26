@@ -43,25 +43,3 @@ def separatorParameter(String label) {
     sectionHeaderStyle: sectionHeaderStyle
   ]
 }
-
-def checkoutWorkspace(String jenkinsGithubCredentialsId, def workspace, String refName = 'origin/master') {
-  log.console("checking out workspace ${workspace.name} @ Git ref ${refName}")
-
-  try {
-    checkout([
-      $class: 'GitSCM',
-      branches: [[name: refName]],
-      extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: workspace.name]],
-      userRemoteConfigs: [[credentialsId: jenkinsGithubCredentialsId, url: workspace.repositoryUrl]]
-    ])
-
-    dir("${env.WORKSPACE}/${workspace.name}") {
-      def lastGitCommitMessage = sh(returnStdout: true, script: 'git show --oneline --date=relative -s')
-      log.console("${workspace.name} last Git commit message: ${lastGitCommitMessage}")
-    }
-  } catch (Throwable throwable) {
-    log.error("workspace Git checkout @${refName} failed: ${workspace.name}")
-    // slack.error("Git checkout failed for workspace: ${workspace.name} (Git ref: ${refName})")
-    throw throwable
-  }
-}
