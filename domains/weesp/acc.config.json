@@ -62,6 +62,7 @@
       "zoom": 7
     }
   },
+  "useStaticMapServer": true,
   "fetchQuestionsFromBackend": false,
   "theme": {},
   "showVulaanControls": false,
