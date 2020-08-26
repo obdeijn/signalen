@@ -3,7 +3,7 @@
 Example for local development:
 
 signalenAcceptancePipeline {
-  ENVIRONMENT = 'acceptance' // Deploy environment
+  ENVIRONMENT = 'production' // Deploy environment
   JENKINS_GITHUB_CREDENTIALS_ID = '431d5971-5b08-46d8-b225-74368ee31ec0'
   SIGNALEN_REPOSITORY = 'jpoppe/signalen'
   SIGNALS_FRONTEND_REPOSITORY = 'jpoppe/signals-frontend'
@@ -19,7 +19,7 @@ signalenAcceptancePipeline {
 @Library('signalen@master') _
 
 signalenReleasePipeline {
-  ENVIRONMENT = 'acceptance' // Deploy environment
+  ENVIRONMENT = 'production' // Deploy environment
   JENKINS_GITHUB_CREDENTIALS_ID = '5b5e63e2-8db7-48c7-8e14-41cbd10eeb4a' // Global Jenkins Github secret token ID
   SIGNALEN_REPOSITORY = 'Amsterdam/signalen' // The signalen mono repository
   SIGNALS_FRONTEND_REPOSITORY = 'Amsterdam/signals-frontend' // The front-end repository
