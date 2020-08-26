@@ -96,7 +96,7 @@ def call(Closure body) {
           checkoutGithubRepository('signalen', pipelineParams.SIGNALEN_REPOSITORY, params.SIGNALEN_RELEASE_TAG)
 
           checkoutGithubRepository(
-            'signalen-frontend',
+            'signals-frontend',
             pipelineParams.SIGNALS_FRONTEND_REPOSITORY,
             params.SIGNALS_FRONTEND_RELEASE_TAG
           )
