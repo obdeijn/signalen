@@ -83,8 +83,8 @@ def call(Closure body) {
 
       stage('Deploy Domains') {
         steps {
-          script { log.warning('deployDomains has been disabled for development purposes') }
-          // deployDomains('acceptance', pipelineParams.DOMAINS)
+          // script { log.warning('deployDomains has been disabled for development purposes') }
+          deployDomains('acceptance', pipelineParams.DOMAINS)
         }
       }
     }
