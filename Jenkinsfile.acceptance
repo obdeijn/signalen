@@ -31,6 +31,7 @@ signalenAcceptancePipeline {
   SLACK_NOTIFICATIONS_CHANNEL = '#ci-signalen' // Build events will be posted to this channel
   JENKINS_NODE = 'BS16 || BS17' // Jenkins client which will run this pipeline
   DOCKER_REGISTRY_AUTH = 'docker_registry_auth' // docker_registry_auth is the ID of a global Jenkins secret
-  DOMAINS = ['amsterdamsebos'] // Front-end domains to build and deploy
+  DOMAINS = ['amsterdam'] // Front-end domains to build and deploy
+  // DOMAINS = ['amsterdamsebos'] // Front-end domains to build and deploy
   // DOMAINS = ['weesp', 'amsterdam', 'amsterdamsebos'] // Front-end domains to build and deploy
 }
