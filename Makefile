@@ -17,6 +17,9 @@ GITHUB_REPOSITORY_OWNER ?= Amsterdam
 SIGNALS_FRONTEND_REPOSITORY_NAME ?= signals-frontend
 IMAGE_TAG ?= latest
 SCHEMA_DEFINITION_GIT_REF ?= master
+DOCKER_REGISTRY ?= docker-registry.data.amsterdam.nl/ois
+SIGNALS_FRONTEND_IMAGE_NAME ?= signalsfrontend
+SIGNALS_FRONTEND_FULL_IMAGE_NAME ?= '${DOCKER_REGISTRY}/${SIGNALS_FRONTEND_IMAGE_NAME}:${IMAGE_TAG}'
 
 # dynamic globals
 DOMAINS := $(subst /,,$(subst ./domains/,,$(dir $(wildcard ./domains/*/))))
@@ -53,6 +56,10 @@ help: ## show this help screen
 
 info: ## dump Makefile variables to screen
 	@echo -e $(_MAKEFILE_VARIABLES)
+
+build-base: ## build and tag the base signals container. Usage `make build-base SIGNALS_FRONTEND_PATH=../signals-frontend`
+	docker build -t $(SIGNALS_FRONTEND_IMAGE_NAME) $(SIGNALS_FRONTEND_PATH)
+	docker tag $(SIGNALS_FRONTEND_IMAGE_NAME):latest $(SIGNALS_FRONTEND_FULL_IMAGE_NAME)
 
 build: ## build Docker Compose images
 	docker-compose build --parallel
