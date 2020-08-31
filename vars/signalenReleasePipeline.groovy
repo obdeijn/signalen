@@ -80,8 +80,6 @@ def call(Closure body) {
         name: 'DOMAIN',
         choices: ['', 'weesp', 'amsterdam', 'amsterdamsebos']
       )
-
-      choice(description: 'target environment', name: 'ENVIRONMENT', choices: ['acceptance', 'production'])
     }
 
     stages {
@@ -103,7 +101,7 @@ def call(Closure body) {
       }
 
       stage('Validate Domain Schema\'s') {
-        steps { validateDomainSchemas(params.ENVIRONMENT, targetDomains) }
+        steps { validateDomainSchemas(pipelineParams.ENVIRONMENT, targetDomains) }
       }
 
       stage('Build `signals-frontend` Base Image') {
@@ -114,7 +112,7 @@ def call(Closure body) {
         steps {
           buildAndPushDockerDomainImages(
             pipelineParams.DOCKER_BUILD_ARG_REGISTRY_HOST,
-            params.ENVIRONMENT,
+            pipelineParams.ENVIRONMENT,
             targetDomains
           )
         }
@@ -123,7 +121,7 @@ def call(Closure body) {
       stage('Deploy Domains') {
         steps {
           // script { log.warning('deployDomains has been disabled for development purposes') }
-          deployDomains(params.ENVIRONMENT, targetDomains)
+          deployDomains(pipelineParams.ENVIRONMENT, targetDomains)
         }
       }
     }

@@ -28,7 +28,6 @@ def call(Closure body) {
 
     triggers {
       githubPush() // listen for GitHub webhooks
-      pollSCM('H/45 * * * *') // poll every 45 minutes for repository changes (fallback for Github webhooks)
     }
 
     options {
