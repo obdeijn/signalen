@@ -77,6 +77,7 @@
   "OIDC_SCOPE": "SIG/ALL",
   "OIDC_AUTH_ENDPOINT": "https://acc.api.data.amsterdam.nl/oauth2/authorize",
   "STATIC_MAP_SERVER_URL": "https://map.data.amsterdam.nl/maps/topografie",
+  "AREAS_ENDPOINT": "https://acc.api.data.amsterdam.nl/signals/v1/private/areas/",
   "USERS_ENDPOINT": "https://acc.api.data.amsterdam.nl/signals/v1/private/users/",
   "ROLES_ENDPOINT": "https://acc.api.data.amsterdam.nl/signals/v1/private/roles/",
   "PERMISSIONS_ENDPOINT": "https://acc.api.data.amsterdam.nl/signals/v1/private/permissions/",
