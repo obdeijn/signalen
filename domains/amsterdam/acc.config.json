@@ -67,7 +67,9 @@
     }
   },
   "useStaticMapServer": true,
+  "fetchDistrictsFromBackend": false,
   "fetchQuestionsFromBackend": false,
+  "fetchSourcesFromBackend": false,
   "theme": {},
   "showVulaanControls": true,
   "OIDC_CLIENT_ID": "sia",
