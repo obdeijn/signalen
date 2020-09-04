@@ -36,7 +36,7 @@ endif
 define _validate_schema =
 	echo validating schema - domain=$(2), environment=$(ENVIRONMENT), schema environment=${3}; \
 	test -f ${1} || (echo validation schema definition not found: ${SCHEMA_DEFINITION_FILE}; exit 1); \
-	npx ajv-cli validate -s ${1} -d domains/${2}/${3}.config.json;
+	npx ajv-cli validate --all-errors -s ${1} -d domains/${2}/${3}.config.json;
 endef
 
 _MAKEFILE_BUILTIN_VARIABLES := .DEFAULT_GOAL CURDIR MAKEFLAGS MAKEFILE_LIST SHELL
