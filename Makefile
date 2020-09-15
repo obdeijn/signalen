@@ -37,7 +37,7 @@ endif
 
 define _validate_schema =
 	echo validating schema - domain=$(2), environment=$(ENVIRONMENT), schema environment=${3} && \
-	test -f ${1} || (echo validation schema definition not found: ${SCHEMA_DEFINITION_FILE}; exit 1) &&& \
+	test -f ${1} || (echo validation schema definition not found: ${SCHEMA_DEFINITION_FILE}; exit 1) && \
 	node merge-config.js $(CONFIG_BASE_FILE) domains/${DOMAIN}/${SCHEMA_ENVIRONMENT}.config.json $(CONFIG_TEST_FILE) && \
 	npx ajv-cli validate --all-errors -s ${SCHEMA_DEFINITION_FILE} -d $(CONFIG_TEST_FILE);
 endef
