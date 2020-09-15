@@ -113,5 +113,5 @@
   "DEPARTMENTS_ENDPOINT": "https://api.data.amsterdam.nl/signals/v1/private/departments/",
   "OVL_KLOKKEN_LAYER": "https://map.data.amsterdam.nl/maps/openbare_verlichting?REQUEST=GetFeature&SERVICE=wfs&OUTPUTFORMAT=application/json;%20subtype=geojson;%20charset=utf-8&Typename=Klokken&version=1.1.0&srsname=urn:ogc:def:crs:EPSG::4326",
   "OVL_VERLICHTING_LAYER": "https://map.data.amsterdam.nl/maps/openbare_verlichting?REQUEST=GetFeature&SERVICE=wfs&OUTPUTFORMAT=application/json;%20subtype=geojson;%20charset=utf-8&Typename=Verlichting&version=1.1.0&srsname=urn:ogc:def:crs:EPSG::4326",
-  "QUESTIONS_ENDPOINT": "https://acc.api.data.amsterdam.nl/signals/v1/public/questions/"
+  "QUESTIONS_ENDPOINT": "https://api.data.amsterdam.nl/signals/v1/public/questions/"
 }
