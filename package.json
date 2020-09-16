@@ -1,0 +1,8 @@
+{
+  "name": "amsterdam-signalen",
+  "devDependencies": {
+    "ajv-cli": "^3.3.0",
+    "lodash.merge": "^4.6.2"
+  },
+  "version": "1.0.0"
+}
