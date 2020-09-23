@@ -1,4 +1,10 @@
 {
+  "language": {
+    "siteTitle": "Meldingen Amsterdam",
+    "smallHeaderTitle": "Meldingen",
+    "title": "Meldingen Amsterdam",
+    "shortTitle": "Meldingen"
+  },
   "apiBaseUrl": "https://api.data.amsterdam.nl",
   "matomo": {
     "siteId": 13

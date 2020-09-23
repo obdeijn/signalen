@@ -1,4 +1,10 @@
 {
+  "language": {
+    "siteTitle": "Meldingen Weesp",
+    "smallHeaderTitle": "Meldingen",
+    "title": "Meldingen Weesp",
+    "shortTitle": "Meldingen"
+  },
   "apiBaseUrl": "https://api.data.amsterdam.nl",
   "logo": {
     "url": "/assets/logos/logo-weesp.svg",
