@@ -1,4 +1,9 @@
 {
+  "language": {
+    "siteTitle": "Meldingen Weesp",
+    "title": "Meldingen Weesp",
+    "shortTitle": "Meldingen"
+  },
   "apiBaseUrl": "https://acc.api.data.amsterdam.nl",
   "logo": {
     "url": "/assets/logos/logo-weesp.svg",
