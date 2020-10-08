@@ -4,8 +4,8 @@ import {JiraIssue, IssueType} from './issue.interface'
 
 export default class JiraService {
   private token: string
-  private headers: {Authorization: string}
-  private url: string
+  private headers: { Authorization: string }
+  private url: string;
 
   public constructor(user: string, token: string, url: string) {
     this.token = Buffer.from(`${user}:${token}`).toString('base64')
@@ -14,7 +14,9 @@ export default class JiraService {
   }
 
   private async get(endpoint: string) {
-    const response = await fetch(`${this.url}/rest/api/3/${endpoint}`, {headers: this.headers})
+    const response = await fetch(`${this.url}/rest/api/3/${endpoint}`, {
+      headers: this.headers
+    })
     return response.json()
   }
 
@@ -30,9 +32,27 @@ export default class JiraService {
   public async getIssue(jiraKey: string) {
     const issue = await this.get(`issue/${jiraKey}`)
 
+    const notFoundIssue: JiraIssue = {
+      key: jiraKey,
+      type: 'unknown',
+      status: 'unknown',
+      title: '',
+      url: ''
+    }
+
+    if (!issue.key) {
+      return {
+        jiraIssue: notFoundIssue,
+        jiraParentIssue: notFoundIssue
+      }
+    }
+
     const jiraIssue: JiraIssue = {
       key: issue.key,
-      type: this.getIssueType(issue.fields.summary, issue.fields.issuetype.name),
+      type: this.getIssueType(
+        issue.fields.summary,
+        issue.fields.issuetype.name
+      ),
       status: issue.fields.status.name.toLowerCase(),
       title: issue.fields.summary.replace('[TEST] ', ''),
       url: this.getIssueUrl(issue.key)
@@ -45,7 +65,9 @@ export default class JiraService {
       issue.fields.parent.fields.issuetype.name
     )
 
-    if (jiraParentIssueType === 'e2e test') jiraIssue.type = jiraParentIssueType
+    if (jiraParentIssueType === 'e2e test') {
+      jiraIssue.type = jiraParentIssueType
+    }
 
     const jiraParentIssue: JiraIssue = {
       key: issue.fields.parent.key,
