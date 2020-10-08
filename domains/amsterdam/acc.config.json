@@ -1,4 +1,9 @@
 {
+  "language": {
+    "siteTitle": "Meldingen Amsterdam",
+    "title": "Meldingen Amsterdam",
+    "shortTitle": "Meldingen"
+  },
   "apiBaseUrl": "https://acc.api.data.amsterdam.nl",
   "matomo": {
     "siteId": 14

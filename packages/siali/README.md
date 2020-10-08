@@ -12,13 +12,27 @@ SIA CLI
 
 
 <!-- toc -->
+* [Installation](#installation)
 * [Usage](#usage)
 * [Commands](#commands)
 <!-- tocstop -->
+
+# Installation
+<!-- installation -->
+- When the package is NOT yet published to npmjs.org
+```sh-session
+$ cd packages/siali
+$ npm link
+```
+
+-  When the package IS published to npmjs.org
+```sh-session
+$ npm install -g @signalen/siali
+```
+
 # Usage
 <!-- usage -->
 ```sh-session
-$ npm install -g @signalen/siali
 $ siali COMMAND
 running command...
 $ siali (-v|--version|version)

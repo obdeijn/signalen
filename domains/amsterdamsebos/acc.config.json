@@ -1,4 +1,9 @@
 {
+  "language": {
+    "siteTitle": "Meldingen Amsterdamse Bos",
+    "title": "Meldingen Amsterdamse Bos",
+    "shortTitle": "Meldingen"
+  },
   "apiBaseUrl": "https://acc.api.data.amsterdam.nl",
   "map": {
     "municipality": [
