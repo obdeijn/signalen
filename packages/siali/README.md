@@ -19,13 +19,13 @@ SIA CLI
 
 # Installation
 <!-- installation -->
-- When the pacakge is NOT yet published to npmjs.org
+- When the package is NOT yet published to npmjs.org
 ```sh-session
 $ cd packages/siali
 $ npm link
 ```
 
--  When the pacakge IS published to npmjs.org
+-  When the package IS published to npmjs.org
 ```sh-session
 $ npm install -g @signalen/siali
 ```
