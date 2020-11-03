@@ -1,9 +1,5 @@
-ARG DOCKER_REGISTRY=docker-registry.data.amsterdam.nl
-ARG DOCKER_REGISTRY_PATH=/ois/
-ARG DOCKER_IMAGE=signalsfrontend
-ARG DOCKER_IMAGE_TAG=latest
-FROM ${DOCKER_REGISTRY}${DOCKER_REGISTRY_PATH}${DOCKER_IMAGE}:${DOCKER_IMAGE_TAG}
+FROM docker-registry.data.amsterdam.nl/ois/signalsfrontend:latest
 
 ARG BUILD_ENV=prod
 
-COPY ${BUILD_ENV}.config.json /environment.conf.json
+COPY ${BUILD_ENV}.config.json /app.json

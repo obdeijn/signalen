@@ -1,4 +1,4 @@
-export type IssueStatus = 'acceptance' | 'review' | 'approved' | 'done'
+export type IssueStatus = 'acceptance' | 'review' | 'approved' | 'done' | 'unknown'
 
 export type IssueType = 'bug' | 'story' | 'ticket' | 'e2e test' | 'core task' | 'chore' | 'unknown' | 'spike' | 'task'
 
