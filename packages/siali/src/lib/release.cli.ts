@@ -25,7 +25,8 @@ const typeIcons = {
   chore: '🔧',
   story: '📜',
   ticket: '🎫',
-  unknown: '🤦'
+  unknown: '🤦',
+  spike: '⚡'
 }
 
 const jiraStatus = (issue: JiraIssue) => terminalLink(
