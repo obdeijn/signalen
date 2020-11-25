@@ -9,9 +9,13 @@
     "siteAddress": "meldingenweesp.amsterdam.nl",
     "siteTitle": "Meldingen Weesp",
     "title": "Meldingen Weesp",
-    "urgentContactInfo": "Voor spoedeisende zaken kunt u ook telefonisch contact opnemen met (0294) 491 391."
+    "urgentContactInfo": "Voor spoedeisende zaken kunt u ook telefonisch contact opnemen met (0294) 491 391.",
+    "logoDescription": "Logo gemeente Weesp, naar weesp.nl"
   },
   "apiBaseUrl": "https://api.data.amsterdam.nl",
+  "links": {
+    "home": "https://www.weesp.nl"
+  },
   "logo": {
     "url": "/assets/logos/logo-weesp.svg",
     "width": "297px",
