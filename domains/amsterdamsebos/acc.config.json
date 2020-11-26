@@ -1,6 +1,7 @@
 {
   "language": {
     "siteTitle": "Meldingen Amsterdamse Bos",
+    "siteAddress": "meldingenamsterdamsebos.amsterdam.nl",
     "title": "Meldingen Amsterdamse Bos",
     "shortTitle": "Meldingen"
   },
@@ -13,12 +14,12 @@
     "options": {
       "maxBounds": [
         [
-          52.29047115018846,
-          4.801453143008987
+          52.25168,
+          4.64034
         ],
         [
-          52.333203310649004,
-          4.856482877032636
+          52.50536,
+          5.10737
         ]
       ],
       "center": [

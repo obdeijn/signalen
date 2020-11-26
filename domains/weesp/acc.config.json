@@ -1,16 +1,27 @@
 {
+  "featureFlags": {
+    "fetchQuestionsFromBackend": true
+  },
   "language": {
+    "footer2": "op werkdagen van 08.00 tot 17.00 uur.",
+    "phoneNumber": "(0294) 491 391",
+    "shortTitle": "Meldingen",
+    "siteAddress": "meldingenweesp.amsterdam.nl",
     "siteTitle": "Meldingen Weesp",
     "title": "Meldingen Weesp",
-    "shortTitle": "Meldingen"
+    "urgentContactInfo": "Voor spoedeisende zaken kunt u ook telefonisch contact opnemen met (0294) 491 391.",
+    "logoDescription": "Logo gemeente Weesp, naar weesp.nl"
   },
   "apiBaseUrl": "https://acc.api.data.amsterdam.nl",
+  "links": {
+    "home": "https://www.weesp.nl"
+  },
   "logo": {
     "url": "/assets/logos/logo-weesp.svg",
-    "width": "unset",
-    "height": "100%",
-    "smallWidth": "unset",
-    "smallHeight": "100%"
+    "width": "297px",
+    "height": "56px",
+    "smallWidth": "169px",
+    "smallHeight": "32px"
   },
   "map": {
     "municipality": "weesp",
