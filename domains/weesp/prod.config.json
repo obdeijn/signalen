@@ -50,5 +50,8 @@
   },
   "oidc": {
     "authEndpoint": "https://api.data.amsterdam.nl/oauth2/authorize"
+  },
+  "keycloak": {
+    "realm": "datapunt-ad-prod"
   }
 }
