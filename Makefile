@@ -26,7 +26,6 @@ DOMAINS := $(subst /,,$(subst ./domains/,,$(dir $(wildcard ./domains/*/))))
 SIGNALEN_GIT_REF := $(shell git rev-parse HEAD)
 SCHEMA_DEFINITION_TEMP_FILE := /tmp/signalen-configuration-schema.$(SIGNALEN_GIT_REF).json
 SCHEMA_DEFINITION_FILE := ${SIGNALS_FRONTEND_PATH}/internals/schemas/${CONFIGURATION_SCHEMA_FILE}
-CONFIG_BASE_FILE := ${SIGNALS_FRONTEND_PATH}/app.base.json
 CONFIG_TEST_FILE := /tmp/app.${DOMAIN}.json
 
 ifeq ($(ENVIRONMENT),acceptance)
@@ -39,7 +38,7 @@ define _validate_schema =
 	echo validating schema - domain=$(2), environment=$(ENVIRONMENT), schema environment=${3} && \
 	npm i && \
 	test -f ${1} || (echo validation schema definition not found: ${SCHEMA_DEFINITION_FILE}; exit 1) && \
-	node merge-config.js $(CONFIG_BASE_FILE) domains/${DOMAIN}/${SCHEMA_ENVIRONMENT}.config.json $(CONFIG_TEST_FILE) && \
+	node merge-config.js domains/${DOMAIN}/base.config.json domains/${DOMAIN}/${SCHEMA_ENVIRONMENT}.config.json $(CONFIG_TEST_FILE) && \
 	npx ajv-cli validate --all-errors -s ${SCHEMA_DEFINITION_FILE} -d $(CONFIG_TEST_FILE);
 endef
 
