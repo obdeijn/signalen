@@ -46,25 +46,13 @@
     "smallHeight": 0
   },
   "map": {
-    "municipality": [
-      "amsterdam",
-      "amstelveen"
-    ],
+    "municipality": ["amsterdam", "amstelveen"],
     "options": {
       "maxBounds": [
-        [
-          52.25168,
-          4.64034
-        ],
-        [
-          52.50536,
-          5.10737
-        ]
+        [52.25168, 4.64034],
+        [52.50536, 5.10737]
       ],
-      "center": [
-        52.3150683,
-        4.8280039
-      ],
+      "center": [52.3150683, 4.8280039],
       "maxZoom": 14,
       "minZoom": 8,
       "zoom": 10
@@ -75,17 +63,10 @@
       "zoom": 7
     },
     "tiles": {
-      "args": [
-        "https://{s}.data.amsterdam.nl/topo_rd/{z}/{x}/{y}.png"
-      ],
+      "args": ["https://{s}.data.amsterdam.nl/topo_rd/{z}/{x}/{y}.png"],
       "options": {
         "attribution": "Kaartgegevens CC-BY-4.0 Gemeente Amsterdam",
-        "subdomains": [
-          "t1",
-          "t2",
-          "t3",
-          "t4"
-        ],
+        "subdomains": ["t1", "t2", "t3", "t4"],
         "tms": true
       }
     },

@@ -49,19 +49,10 @@
     "municipality": "weesp",
     "options": {
       "maxBounds": [
-        [
-          52.294084,
-          5.008621
-        ],
-        [
-          52.322999,
-          5.063810
-        ]
+        [52.294084, 5.008621],
+        [52.322999, 5.06381]
       ],
-      "center": [
-        52.3107404,
-        5.0322487
-      ],
+      "center": [52.3107404, 5.0322487],
       "zoom": 10,
       "maxZoom": 14,
       "minZoom": 9
@@ -72,17 +63,10 @@
       "zoom": 7
     },
     "tiles": {
-      "args": [
-        "https://{s}.data.amsterdam.nl/topo_rd/{z}/{x}/{y}.png"
-      ],
+      "args": ["https://{s}.data.amsterdam.nl/topo_rd/{z}/{x}/{y}.png"],
       "options": {
         "attribution": "Kaartgegevens CC-BY-4.0 Gemeente Amsterdam",
-        "subdomains": [
-          "t1",
-          "t2",
-          "t3",
-          "t4"
-        ],
+        "subdomains": ["t1", "t2", "t3", "t4"],
         "tms": true
       }
     },
