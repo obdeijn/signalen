@@ -26,7 +26,7 @@ DOMAINS := $(subst /,,$(subst ./domains/,,$(dir $(wildcard ./domains/*/))))
 SIGNALEN_GIT_REF := $(shell git rev-parse HEAD)
 SCHEMA_DEFINITION_TEMP_FILE := /tmp/signalen-configuration-schema.$(SIGNALEN_GIT_REF).json
 SCHEMA_DEFINITION_FILE := ${SIGNALS_FRONTEND_PATH}/internals/schemas/${CONFIGURATION_SCHEMA_FILE}
-CONFIG_BASE_FILE := ${SIGNALS_FRONTEND_PATH}/app.base.json
+CONFIG_BASE_FILE := ${SIGNALS_FRONTEND_PATH}/app.amsterdam.json
 CONFIG_TEST_FILE := /tmp/app.${DOMAIN}.json
 
 ifeq ($(ENVIRONMENT),acceptance)

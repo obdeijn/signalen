@@ -31,7 +31,7 @@ const iconSlugs = {
   ticket: ':ticket:',
   story: ':book:',
   chore: ':wrench:',
-  unknown: ':face_palm:',
+  unknown: ':facepalm:',
   'e2e test': ':traffic_light:',
   'core task': ':package:',
   spike: ':zap:',
