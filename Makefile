@@ -40,7 +40,7 @@ define _validate_schema =
 	npm i && \
 	test -f ${1} || (echo validation schema definition not found: ${SCHEMA_DEFINITION_FILE}; exit 1) && \
 	node merge-config.js $(CONFIG_BASE_FILE) domains/${DOMAIN}/${SCHEMA_ENVIRONMENT}.config.json $(CONFIG_TEST_FILE) && \
-	npx ajv-cli validate --all-errors -s ${SCHEMA_DEFINITION_FILE} -d $(CONFIG_TEST_FILE);
+	npx ajv-cli@3.3.0 validate --all-errors -s ${SCHEMA_DEFINITION_FILE} -d $(CONFIG_TEST_FILE);
 endef
 
 _MAKEFILE_BUILTIN_VARIABLES := .DEFAULT_GOAL CURDIR MAKEFLAGS MAKEFILE_LIST SHELL
