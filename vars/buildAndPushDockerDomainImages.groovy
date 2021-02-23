@@ -26,6 +26,8 @@ def buildAndPushDockerImage(String dockerBuildArgRegistryHost, String environmen
 }
 
 def call(String dockerBuildArgRegistryHost, String environment, def domains) {
+  log.console("dockerBuildArgRegistryHost, environment: ${dockerBuildArgRegistryHost} ${environment}")
+
   def steps = [:]
 
   domains.each {domain -> steps["BUILD_IMAGE_${domain}_${environment}".toUpperCase()] = {
