@@ -5,6 +5,7 @@ def initializePipeline(banner, pipelineParams, params) {
   env.SLACK_NOTIFICATIONS_CHANNEL = pipelineParams.SLACK_NOTIFICATIONS_CHANNEL
   env.DOCKER_REGISTRY_AUTH = pipelineParams.DOCKER_REGISTRY_AUTH
   env.JENKINS_GITHUB_CREDENTIALS_ID = pipelineParams.JENKINS_GITHUB_CREDENTIALS_ID
+  env.JENKINS_TARGET = pipelineParams.JENKINS_TARGET
 
   ansiColor('xterm') {
     log.highlight(banner)

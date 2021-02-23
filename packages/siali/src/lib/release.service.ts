@@ -35,7 +35,8 @@ const iconSlugs = {
   'e2e test': ':traffic_light:',
   'core task': ':package:',
   spike: ':zap:',
-  task: ':zap:'
+  task: ':zap:',
+  epic: ':tickets:'
 }
 
 export const getSemanticVersionType = (version: string): SemanticVersion => {
@@ -68,13 +69,14 @@ export default class ReleaseService {
       'core task': [],
       unknown: [],
       spike: [],
-      task: []
+      task: [],
+      epic: []
     }
 
     Object.values(issues.reduce((group: GroupedIssues, issue: Issue) => {
       if (!group[issue.type]) {
         console.log('')
-        console.log(issue.type)
+        console.log(`unknown issue type' "${issue.type}", branch name: ${issue.headRefName}`)
         console.log('')
       }
 

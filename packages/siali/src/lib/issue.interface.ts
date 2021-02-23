@@ -1,6 +1,21 @@
-export type IssueStatus = 'acceptance' | 'review' | 'approved' | 'done' | 'unknown'
+export type IssueStatus =
+  | 'acceptance'
+  | 'review'
+  | 'approved'
+  | 'done'
+  | 'unknown';
 
-export type IssueType = 'bug' | 'story' | 'ticket' | 'e2e test' | 'core task' | 'chore' | 'unknown' | 'spike' | 'task'
+export type IssueType =
+  | 'bug'
+  | 'story'
+  | 'ticket'
+  | 'e2e test'
+  | 'core task'
+  | 'chore'
+  | 'unknown'
+  | 'spike'
+  | 'task'
+  | 'epic';
 
 interface BaseIssue {
   description: string
@@ -23,6 +38,7 @@ export interface GroupedIssues {
   'core task': Issue[]
   spike: Issue[]
   task: Issue[]
+  epic: Issue[]
 }
 
 export interface JiraIssue {
