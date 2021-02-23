@@ -105,7 +105,10 @@ def call(Closure body) {
       }
 
       stage('Build `signals-frontend` Base Image') {
-        steps { buildAndPushSignalsFrontendDockerImage(params.SIGNALS_FRONTEND_RELEASE_TAG) }
+        steps { buildAndPushSignalsFrontendDockerImage(
+          pipelineParams.DOCKER_BUILD_ARG_REGISTRY_HOST,
+          params.SIGNALS_FRONTEND_RELEASE_TAG)
+        }
       }
 
       stage ('Build Domain Images') {
