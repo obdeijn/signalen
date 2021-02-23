@@ -1,6 +1,11 @@
 def deployDomain(String dockerImageTag, String domain) {
   def appName = "app_signals-${domain}"
 
+  if (env.JENKINS_TARGET == 'docker') {
+    log.info("skip deploying domain ${domain} to ${dockerImageTag} as ${appName} since we are not in production mode")
+    return
+  }
+
   log.info("deploying domain ${domain} to ${dockerImageTag} as ${appName}")
 
   try {
