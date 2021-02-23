@@ -1,4 +1,5 @@
-FROM docker-registry.data.amsterdam.nl/ois/signalsfrontend:latest
+ARG DOCKER_REGISTRY=docker-registry.data.amsterdam.nl
+FROM ${DOCKER_REGISTRY}/ois/signalsfrontend:latest
 
 ARG BUILD_ENV=prod
 
