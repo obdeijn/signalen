@@ -765,4 +765,4 @@ GITHUB_USER=$(github_user_get)
 log_info "this script will continue with GitHub user: ${GITHUB_USER}"
 
 prepare_github_repositories
-# bootstrap_sia_jenkins_environment
+bootstrap_sia_jenkins_environment
