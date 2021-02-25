@@ -1,3 +1,23 @@
+/*
+
+Example for local development:
+
+signalenAcceptancePipeline {
+  ENVIRONMENT = 'acceptance'
+  SIGNALEN_BRANCH = 'master'
+  SIGNALS_FRONTEND_BRANCH = 'master'
+  JENKINS_GITHUB_CREDENTIALS_ID = '431d5971-5b08-46d8-b225-74368ee31ec0'
+  SIGNALEN_REPOSITORY = 'aditudorache/signalen'
+  SIGNALS_FRONTEND_REPOSITORY = 'aditudorache/signals-frontend'
+  DOCKER_BUILD_ARG_REGISTRY_HOST = '172.17.0.1:5000'
+  SLACK_NOTIFICATIONS_CHANNEL = ''
+  JENKINS_NODE = 'master'
+  DOCKER_REGISTRY_AUTH = ''
+  DOMAINS = ['weesp', 'amsterdam', 'amsterdamsebos']
+}
+
+*/
+
 @Library('signalen@master') _
 
 signalenAcceptancePipeline {
