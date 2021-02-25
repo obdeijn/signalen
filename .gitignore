@@ -1,2 +1,3 @@
 node_modules/
 docker-jenkins-environment/cache
+docker-jenkins-environment/data
