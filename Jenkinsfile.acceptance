@@ -8,10 +8,10 @@ signalenAcceptancePipeline {
   JENKINS_TARGET='production' // Docker is used for development, production for production
   SIGNALEN_BRANCH = 'develop' // Signalen branch to build
   SIGNALS_FRONTEND_BRANCH = 'develop' // Signals-frontend branch to build
-  SIGNALEN_REPOSITORY = 'Amsterdam/signalen' // The signalen mono repository
-  SIGNALS_FRONTEND_REPOSITORY = 'Amsterdam/signals-frontend' // The front-end repository
-  DOCKER_BUILD_ARG_REGISTRY_HOST = 'docker-registry.data.amsterdam.nl' // Used as Dockerfile ARG
-  SLACK_NOTIFICATIONS_CHANNEL = '#ci-signalen' // Build events will be posted to this channel
-  JENKINS_NODE = 'BS16 || BS17' // Jenkins client which will run this pipeline
-  DOCKER_REGISTRY_AUTH = 'docker_registry_auth' // docker_registry_auth is the ID of a global Jenkins secret
+  SIGNALEN_REPOSITORY = 'aditudorache/signalen'
+  SIGNALS_FRONTEND_REPOSITORY = 'aditudorache/signals-frontend'
+  DOCKER_BUILD_ARG_REGISTRY_HOST = '172.17.0.1:5000'
+  SLACK_NOTIFICATIONS_CHANNEL = ''
+  JENKINS_NODE = 'master'
+  DOCKER_REGISTRY_AUTH = ''
 }
