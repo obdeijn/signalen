@@ -5,21 +5,26 @@
 # @description
 #     This script configures a local Docker environment with SIA pipelines.
 #
-#     Instructions
+#     Instructions:
 #
 #      * Start the Jenkins docker environment and bootstrap it:
-#        cd ~/docker-jenkins-environment/internals/jenkins
+#        cd ~/signalen/docker-jenkins-environment
 #        docker-compose up
 #        ./bootstrap_sia_jenkins_environment.sh
 #
+#     Generate shell script Markdown documentation:
+#
+#     * shdoc < bootstrap-docker-jenkins.sh > bootstrap-docker-jenkins.md
+#
 
-JENKINS_DOCKER_URL=http://localhost:8081
-JENKINS_PRODUCTION_URL=https://ci.data.amsterdam.nl
+JENKINS_DOCKER_URL="http://localhost:8081"
+JENKINS_PRODUCTION_URL="https://ci.data.amsterdam.nl"
 JENKINS_ADMIN_USER="admin"
 JENKINS_ADMIN_PASSWORD="admin"
-JENKINS_JOB_FIELDS=name,color,url
+JENKINS_JOB_FIELDS="name,color,url"
 SMEE_PROXY_URL="https://smee.io/rMm3gwdjhMxFnkZg"
 GITHUB_API_URL=https://api.github.com
+CACHE_DIRECTORY=./cache
 
 JENKINS_CRUMB=$(
   curl --silent \
@@ -38,7 +43,7 @@ JENKINS_CRUMB=$(
 # @exitcode 0 If successful.
 # @exitcode 1 If failed.
 #
-function jenkins_token_generate {
+function jenkins_token_generate() {
   curl \
     --silent \
     --cookie jenkins_admin_cookies.txt \
@@ -65,7 +70,7 @@ function log_info() {
 # @description Log error.
 #
 # @example
-#    log_error "this will be logged to stdout"
+#    log_error "this error will be logged to stdout"
 #
 # @arg $1 string String to print
 #
@@ -80,7 +85,7 @@ function log_error() {
 #
 # @arg $1 string url - Url
 #
-function _get_response_code {
+function _get_response_code() {
   local url=$1
 
   curl -s -w "%{http_code}" "$url" -o /dev/null
@@ -93,7 +98,7 @@ function _get_response_code {
 #
 # @arg $1 string url - Url
 #
-function _github_get {
+function _github_get() {
   local url=$1
 
   curl --silent \
@@ -110,7 +115,7 @@ function _github_get {
 #
 # @arg $1 string query - Query
 #
-function _jenkins_get {
+function _jenkins_get() {
   local query=$1
 
   curl --user "${JENKINS_ADMIN_USER}:${JENKINS_ADMIN_TOKEN}" "${JENKINS_DOCKER_URL}/${query}"
@@ -123,7 +128,7 @@ function _jenkins_get {
 #
 # @arg $1 string query - Query
 #
-function _jenkins_post {
+function _jenkins_post() {
   local query=$1
 
   curl -X POST \
@@ -140,7 +145,7 @@ function _jenkins_post {
 # @arg $1 string query - Query
 # @arg $2 string data - Data to post
 #
-function _jenkins_post_data {
+function _jenkins_post_data() {
   local query=$1
   local data=$2
 
@@ -159,7 +164,7 @@ function _jenkins_post_data {
 # @arg $1 string query - Query
 # @arg $2 string json - JSON data to post
 #
-function _jenkins_post_json {
+function _jenkins_post_json() {
   local query=$1
   local json=$2
 
@@ -177,12 +182,28 @@ function _jenkins_post_json {
 #
 # @arg $1 string command_name - Command to check
 #
-function _check_command {
+function _check_command() {
   local command_name=$1
 
   if ! [[ -x "$(command -v "$command_name")" ]]; then
     log_error "${0} requires ${command_name} to run, please install and/or add it to your path" >&2
     exit 1
+  fi
+}
+
+# @description Check if directory exists otherwise create it.
+#
+# @example
+#    _check_directory_exists git
+#
+# @arg $1 string directory - Directory to check and to create
+#
+function _check_directory_exists() {
+  local directory=$1
+
+  if [[ ! -d  "$directory" ]]; then
+    log_info "Creating directory: ${directory}"
+    mkdir "$directory"
   fi
 }
 
@@ -194,7 +215,7 @@ function _check_command {
 # @arg $1 string env_name - Name of the environment variable
 # @arg $1 string message - Message to display when environment variable is empty
 #
-function _check_env_variable {
+function _check_env_variable() {
   local env_name=$1
   local message=$2
 
@@ -212,7 +233,7 @@ function _check_env_variable {
 #
 # @arg $1 string script_name - Name of the Groovy script to execute
 #
-function _jenkins_groovy {
+function _jenkins_groovy() {
   local script_name=$1
 
   curl \
@@ -228,7 +249,7 @@ function _jenkins_groovy {
 #
 # @noargs
 #
-function github_user_details {
+function github_user_details() {
   _github_get ${GITHUB_API_URL}/user
 }
 
@@ -239,7 +260,7 @@ function github_user_details {
 #
 # @noargs
 #
-function github_user_get {
+function github_user_get() {
   github_user_details | jq -r '.login'
 }
 
@@ -251,7 +272,7 @@ function github_user_get {
 # @arg $1 string org - Name of Github repository owner/organization
 # @arg $2 string repo - Name of GitHub repository
 #
-function github_repo_delete {
+function github_repo_delete() {
   local org=$1
   local repo=$2
 
@@ -266,7 +287,7 @@ function github_repo_delete {
 #
 # @arg $1 string repository - Name of GitHub repository to check
 #
-function github_repository_exists {
+function github_repository_exists() {
   local repository=$1
   local response_code
 
@@ -288,7 +309,7 @@ function github_repository_exists {
 # @arg $1 string repository - Name of GitHub repository
 # @arg $2 string id - GitHub webhook id
 #
-function github_webhook_get {
+function github_webhook_get() {
   local repository=$1
   local id=$2
 
@@ -308,7 +329,7 @@ function github_webhook_get {
 # @arg $1 string repository - Name of GitHub repository
 # @arg $2 string id - GitHub webhook id
 #
-function github_webhook_delete {
+function github_webhook_delete() {
   local repository=$1
   local id=$2
 
@@ -328,7 +349,7 @@ function github_webhook_delete {
 # @arg $1 string repository - Name of GitHub repository
 # @arg $2 string url - Url where the hooks will be delivered
 #
-function github_webhook_create {
+function github_webhook_create() {
   local repository=$1
   local url=$2
 
@@ -346,17 +367,13 @@ function github_webhook_create {
 # @arg $1 string org - Name of Github repository owner/organization
 # @arg $2 string repo - Name of GitHub repository
 #
-function github_repo_fork {
+function github_repo_fork() {
   local org=$1
   local repo=$2
   local repository="$org/$repo"
 
   echo "forking repository: ${repository}"
-  # gh repo fork "${org}/${repo}" --remote=false --clone=false
-  cd ./cache
   gh repo fork "${org}/${repo}" --remote=false --clone=true
-  # gh repo fork "${org}/${repo}" --remote=false --clone=false
-  cd -
 }
 
 # @description Copy a Jenkins pipeline from production.
@@ -368,7 +385,7 @@ function github_repo_fork {
 # @arg $1 string job_name - Name of the Jenkins pipeline
 # @arg $2 string folder_name - Name of the pipeline folder
 #
-function production_jenkins_job_get {
+function production_jenkins_job_get() {
   local job_name=$1
   local folder_name=$2
 
@@ -393,7 +410,7 @@ function production_jenkins_job_get {
 #
 # @arg $1 string plugin_name - Name of the Jenkins plugin
 #
-function jenkins_plugin_install {
+function jenkins_plugin_install() {
   local plugin_name=$1
 
   _jenkins_post_data \
@@ -408,7 +425,7 @@ function jenkins_plugin_install {
 #
 # @noargs
 #
-function jenkins_plugin_list {
+function jenkins_plugin_list() {
   _jenkins_get pluginManager/api/json?depth=1 | \
     jq --raw-output '.plugins[] | "\(.shortName):\(.version)"' | \
     sort
@@ -421,7 +438,7 @@ function jenkins_plugin_list {
 #
 # @noargs
 #
-function jenkins_safe_restart {
+function jenkins_safe_restart() {
   _jenkins_post safeRestart
 
   sleep 10
@@ -557,7 +574,7 @@ function jenkins_credentials_global_add() {
 # @arg $2 string folder_name - Name of the pipeline folder
 # @arg $3 string data - Job parameters could be json, url encoded or data file
 #
-function jenkins_job_build {
+function jenkins_job_build() {
   # curl -X POST --data "package_name=ABC.tar.gz" --data "release_notes=none" --data "delay=0sec"o
   # https://github.com/stevshil/Shell/blob/master/jenkinsapi/buildJob
 
@@ -587,7 +604,7 @@ function jenkins_job_build {
 #
 # @noargs
 #
-function bootstrap_sia_jenkins_environment {
+function bootstrap_sia_jenkins_environment() {
   log_info "bootstrap - get the SIA pipelines from production (Make sure shared VPN is active)"
   echo "this requires the following environment values to be set: $JENKINS_PRODUCTION_USER and $JENKINS_PRODUCTION_TOKEN"
 
@@ -650,14 +667,12 @@ function bootstrap_sia_jenkins_environment {
 # @arg $2 string key - Key name which holds value to replace
 # @arg $3 string value - Value to replace with
 #
-function jenkins_parameter_replace {
+function jenkins_parameter_replace() {
   local jenkins_file=$1
   local key=$2
   local value=$3
 
-  echo gsed -i "s,\(${key} = \).*,\1'${value}'," "$jenkins_file"
-  gsed -i "s,\(${key} = \).*,\1'${value}'," "$jenkins_file"
-  echo
+  $SED -i "s,\(${key} = \).*,\1'${value}'," "$jenkins_file"
 }
 
 # @description Prepare the SIA GitHub repositories, this will clone and modify the SIA repositories.
@@ -667,19 +682,26 @@ function jenkins_parameter_replace {
 #
 # @noargs
 #
-function prepare_github_repositories {
+function prepare_github_repositories() {
+  local current_directory
+
+  current_directory=$(pwd)
+
   log_info "github - check if GitHub repository ${GITHUB_USER}/signalen exists"
+
   github_repository_exists signalen || {
+    cd "$CACHE_DIRECTORY" || { log_error "cache directory does not exist: ${CACHE_DIRECTORY}"; exit 1; }
+
     github_repo_fork Amsterdam signalen
 
-    cd ./cache/signalen
+    cd "./signalen" || { log_error "signalen directory does not exist: ${CACHE_DIRECTORY}"; exit 1; }
 
     git checkout --track origin/master
 
     jenkins_parameter_replace ./Jenkinsfile.acceptance JENKINS_TARGET docker
     jenkins_parameter_replace ./Jenkinsfile.acceptance SIGNALEN_REPOSITORY "${GITHUB_USER}/signalen"
     jenkins_parameter_replace ./Jenkinsfile.acceptance SIGNALS_FRONTEND_REPOSITORY "${GITHUB_USER}/signals-frontend"
-    jenkins_parameter_replace ./Jenkinsfile.acceptance DOCKER_BUILD_ARG_REGISTRY_HOST 172.24.0.1:5000
+    jenkins_parameter_replace ./Jenkinsfile.acceptance DOCKER_BUILD_ARG_REGISTRY_HOST 172.17.0.1:5000
     jenkins_parameter_replace ./Jenkinsfile.acceptance SLACK_NOTIFICATIONS_CHANNEL ""
     jenkins_parameter_replace ./Jenkinsfile.acceptance JENKINS_NODE "master"
     jenkins_parameter_replace ./Jenkinsfile.acceptance DOCKER_REGISTRY_AUTH ""
@@ -687,14 +709,14 @@ function prepare_github_repositories {
     jenkins_parameter_replace ./Jenkinsfile.release JENKINS_TARGET docker
     jenkins_parameter_replace ./Jenkinsfile.release SIGNALEN_REPOSITORY "${GITHUB_USER}/signalen"
     jenkins_parameter_replace ./Jenkinsfile.release SIGNALS_FRONTEND_REPOSITORY "${GITHUB_USER}/signals-frontend"
-    jenkins_parameter_replace ./Jenkinsfile.release DOCKER_BUILD_ARG_REGISTRY_HOST 172.24.0.1:5000
+    jenkins_parameter_replace ./Jenkinsfile.release DOCKER_BUILD_ARG_REGISTRY_HOST 172.17.0.1:5000
     jenkins_parameter_replace ./Jenkinsfile.release SLACK_NOTIFICATIONS_CHANNEL ""
     jenkins_parameter_replace ./Jenkinsfile.release JENKINS_NODE "master"
     jenkins_parameter_replace ./Jenkinsfile.release DOCKER_REGISTRY_AUTH ""
 
     git commit -a -m 'updated Jenkinsfiles for local testing' && git push
 
-    cd -
+    cd "$current_directory" || { log_error "could not open directory: ${current_directory}"; exit 1; }
   }
 
   log_info "github - check if GitHub repository ${GITHUB_USER}/signals-frontend exists"
@@ -713,15 +735,24 @@ function prepare_github_repositories {
 
 log_info "requirements - checking script dependencies"
 
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  SED='gsed'
+else
+  SED='sed'
+fi
+
 _check_command git
 _check_command jq
 _check_command gh
 _check_command xmlstarlet
 _check_command curl
+_check_command $SED
 
 _check_env_variable JENKINS_PRODUCTION_USER "your ci.data.amsterdam Jenkins user account name"
 _check_env_variable JENKINS_PRODUCTION_TOKEN "your personal ci.data.amsterdam Jenkins user token"
 _check_env_variable GITHUB_JENKINS_TOKEN "your personal GitHub access token with read/write permissions"
+
+_check_directory_exists $CACHE_DIRECTORY
 
 ##############################################################################
 # Development / Info functions
@@ -765,4 +796,4 @@ GITHUB_USER=$(github_user_get)
 log_info "this script will continue with GitHub user: ${GITHUB_USER}"
 
 prepare_github_repositories
-# bootstrap_sia_jenkins_environment
+bootstrap_sia_jenkins_environment

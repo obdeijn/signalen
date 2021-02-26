@@ -6,50 +6,55 @@ Script to clone Basis SIA Jenkins environment to Docker
 
 This script configures a local Docker environment with SIA pipelines.
 
-Instructions
+Instructions:
 
 * Start the Jenkins docker environment and bootstrap it:
-cd ~/docker-jenkins-environment/internals/jenkins
+cd ~/signalen/docker-jenkins-environment
 docker-compose up
 ./bootstrap_sia_jenkins_environment.sh
 
+Generate shell script Markdown documentation:
+
+* shdoc < bootstrap-docker-jenkins.sh > bootstrap-docker-jenkins.md
+
 ## Index
 
-* [function jenkins_token_generate {](#function-jenkins_token_generate-)
+* [jenkins_token_generate()](#jenkins_token_generate)
 * [log_info()](#log_info)
 * [log_error()](#log_error)
-* [function _get_response_code {](#function-_get_response_code-)
-* [function _github_get {](#function-_github_get-)
-* [function _jenkins_get {](#function-_jenkins_get-)
-* [function _jenkins_post {](#function-_jenkins_post-)
-* [function _jenkins_post_data {](#function-_jenkins_post_data-)
-* [function _jenkins_post_json {](#function-_jenkins_post_json-)
-* [function _check_command {](#function-_check_command-)
-* [function _check_env_variable {](#function-_check_env_variable-)
-* [function _jenkins_groovy {](#function-_jenkins_groovy-)
-* [function github_user_details {](#function-github_user_details-)
-* [function github_user_get {](#function-github_user_get-)
-* [function github_repo_delete {](#function-github_repo_delete-)
-* [function github_repository_exists {](#function-github_repository_exists-)
-* [function github_webhook_get {](#function-github_webhook_get-)
-* [function github_webhook_delete {](#function-github_webhook_delete-)
-* [function github_webhook_create {](#function-github_webhook_create-)
-* [function github_repo_fork {](#function-github_repo_fork-)
-* [function production_jenkins_job_get {](#function-production_jenkins_job_get-)
-* [function jenkins_plugin_install {](#function-jenkins_plugin_install-)
-* [function jenkins_plugin_list {](#function-jenkins_plugin_list-)
-* [function jenkins_safe_restart {](#function-jenkins_safe_restart-)
+* [_get_response_code()](#_get_response_code)
+* [_github_get()](#_github_get)
+* [_jenkins_get()](#_jenkins_get)
+* [_jenkins_post()](#_jenkins_post)
+* [_jenkins_post_data()](#_jenkins_post_data)
+* [_jenkins_post_json()](#_jenkins_post_json)
+* [_check_command()](#_check_command)
+* [_check_directory_exists()](#_check_directory_exists)
+* [_check_env_variable()](#_check_env_variable)
+* [_jenkins_groovy()](#_jenkins_groovy)
+* [github_user_details()](#github_user_details)
+* [github_user_get()](#github_user_get)
+* [github_repo_delete()](#github_repo_delete)
+* [github_repository_exists()](#github_repository_exists)
+* [github_webhook_get()](#github_webhook_get)
+* [github_webhook_delete()](#github_webhook_delete)
+* [github_webhook_create()](#github_webhook_create)
+* [github_repo_fork()](#github_repo_fork)
+* [production_jenkins_job_get()](#production_jenkins_job_get)
+* [jenkins_plugin_install()](#jenkins_plugin_install)
+* [jenkins_plugin_list()](#jenkins_plugin_list)
+* [jenkins_safe_restart()](#jenkins_safe_restart)
 * [jenkins_job_get()](#jenkins_job_get)
 * [jenkins_job_create()](#jenkins_job_create)
 * [jenkins_job_delete()](#jenkins_job_delete)
 * [jenkins_job_list()](#jenkins_job_list)
 * [jenkins_credentials_global_add()](#jenkins_credentials_global_add)
-* [function jenkins_job_build {](#function-jenkins_job_build-)
-* [function bootstrap_sia_jenkins_environment {](#function-bootstrap_sia_jenkins_environment-)
-* [function jenkins_parameter_replace {](#function-jenkins_parameter_replace-)
-* [function prepare_github_repositories {](#function-prepare_github_repositories-)
+* [jenkins_job_build()](#jenkins_job_build)
+* [bootstrap_sia_jenkins_environment()](#bootstrap_sia_jenkins_environment)
+* [jenkins_parameter_replace()](#jenkins_parameter_replace)
+* [prepare_github_repositories()](#prepare_github_repositories)
 
-### function jenkins_token_generate {
+### jenkins_token_generate()
 
 Generate a Jenkins Token.
 
@@ -89,14 +94,14 @@ Log error.
 #### Example
 
 ```bash
-log_error "this will be logged to stdout"
+log_error "this error will be logged to stdout"
 ```
 
 #### Arguments
 
 * **$1** (string): String to print
 
-### function _get_response_code {
+### _get_response_code()
 
 Make a GET request and return the response code.
 
@@ -110,7 +115,7 @@ _get_response_code https://amsterdam.nl
 
 * **$1** (string): url - Url
 
-### function _github_get {
+### _github_get()
 
 Make an authorized GET request to GitHub.
 
@@ -124,7 +129,7 @@ _github_get user
 
 * **$1** (string): url - Url
 
-### function _jenkins_get {
+### _jenkins_get()
 
 Make an authorized GET request to Jenkins.
 
@@ -138,7 +143,7 @@ _jenkins_get
 
 * **$1** (string): query - Query
 
-### function _jenkins_post {
+### _jenkins_post()
 
 Make an authorized POST request to Jenkins.
 
@@ -152,7 +157,7 @@ _jenkins_post safeRestart
 
 * **$1** (string): query - Query
 
-### function _jenkins_post_data {
+### _jenkins_post_data()
 
 Make an authorized POST request with data to Jenkins.
 
@@ -167,7 +172,7 @@ _jenkins_post_data "$query" "@cache/${job_xml}"
 * **$1** (string): query - Query
 * **$2** (string): data - Data to post
 
-### function _jenkins_post_json {
+### _jenkins_post_json()
 
 Make an authorized POST request with JSON data to Jenkins.
 
@@ -182,7 +187,7 @@ _jenkins_post_json
 * **$1** (string): query - Query
 * **$2** (string): json - JSON data to post
 
-### function _check_command {
+### _check_command()
 
 Check if command exists or exit.
 
@@ -196,7 +201,21 @@ _check_command git
 
 * **$1** (string): command_name - Command to check
 
-### function _check_env_variable {
+### _check_directory_exists()
+
+Check if directory exists otherwise create it.
+
+#### Example
+
+```bash
+_check_directory_exists git
+```
+
+#### Arguments
+
+* **$1** (string): directory - Directory to check and to create
+
+### _check_env_variable()
 
 Check if environment variable exists, otherwise print message and exit.
 
@@ -211,7 +230,7 @@ _check_env_variable ENVIRONMENT_VARIABLE_NAME "description of environment variab
 * **$1** (string): env_name - Name of the environment variable
 * **$1** (string): message - Message to display when environment variable is empty
 
-### function _jenkins_groovy {
+### _jenkins_groovy()
 
 Execute a Groovy script via the Jenkins rest API.
 
@@ -225,7 +244,7 @@ _jenkins_groovy ./script.groovy
 
 * **$1** (string): script_name - Name of the Groovy script to execute
 
-### function github_user_details {
+### github_user_details()
 
 Get user details from GitHub
 
@@ -237,7 +256,7 @@ github_user_details
 
 _Function has no arguments._
 
-### function github_user_get {
+### github_user_get()
 
 Get user name from GitHub user details
 
@@ -249,7 +268,7 @@ github_user_get
 
 _Function has no arguments._
 
-### function github_repo_delete {
+### github_repo_delete()
 
 Check if environment variable exists, otherwise print message and exit.
 
@@ -264,7 +283,7 @@ github_repo_delete ENVIRONMENT_VARIABLE_NAME "description of environment variabl
 * **$1** (string): org - Name of Github repository owner/organization
 * **$2** (string): repo - Name of GitHub repository
 
-### function github_repository_exists {
+### github_repository_exists()
 
 Check if GitHub repository exists, otherwise log error and exit.
 
@@ -278,7 +297,7 @@ github_repository_exists signals-frontend
 
 * **$1** (string): repository - Name of GitHub repository to check
 
-### function github_webhook_get {
+### github_webhook_get()
 
 Get GitHub web hook details.
 
@@ -293,7 +312,7 @@ github_webhook_get signals-frontend 123456
 * **$1** (string): repository - Name of GitHub repository
 * **$2** (string): id - GitHub webhook id
 
-### function github_webhook_delete {
+### github_webhook_delete()
 
 Delete GitHub web hook.
 
@@ -308,7 +327,7 @@ github_webhook_delete signals-frontend 280511274
 * **$1** (string): repository - Name of GitHub repository
 * **$2** (string): id - GitHub webhook id
 
-### function github_webhook_create {
+### github_webhook_create()
 
 Create GitHub web hook.
 
@@ -323,7 +342,7 @@ github_webhook_create signals-frontend 123456
 * **$1** (string): repository - Name of GitHub repository
 * **$2** (string): url - Url where the hooks will be delivered
 
-### function github_repo_fork {
+### github_repo_fork()
 
 Fork GitHub repository.
 
@@ -338,7 +357,7 @@ github_repo_fork Amsterdam signals-frontend
 * **$1** (string): org - Name of Github repository owner/organization
 * **$2** (string): repo - Name of GitHub repository
 
-### function production_jenkins_job_get {
+### production_jenkins_job_get()
 
 Copy a Jenkins pipeline from production.
 
@@ -354,7 +373,7 @@ production_jenkins_job_get signalen-release SIA_Signalen_Amsterdam
 * **$1** (string): job_name - Name of the Jenkins pipeline
 * **$2** (string): folder_name - Name of the pipeline folder
 
-### function jenkins_plugin_install {
+### jenkins_plugin_install()
 
 Install a Jenkins plugin.
 
@@ -368,7 +387,7 @@ jenkins_plugin_install git
 
 * **$1** (string): plugin_name - Name of the Jenkins plugin
 
-### function jenkins_plugin_list {
+### jenkins_plugin_list()
 
 List all installed Jenkins plugins.
 
@@ -380,7 +399,7 @@ jenkins_plugin_list
 
 _Function has no arguments._
 
-### function jenkins_safe_restart {
+### jenkins_safe_restart()
 
 Restart Jenkins.
 
@@ -467,7 +486,7 @@ jenkins_credentials_global_add jpoppe 3233243242343243242344
 * **$1** (string): github_user - Your GitHub user name
 * **$2** (string): github_token - Your secret GitHub Token
 
-### function jenkins_job_build {
+### jenkins_job_build()
 
 Trigger a Jenkins pipeline build.
 
@@ -483,7 +502,7 @@ jenkins_job_build signalen-acceptance SIA_Signalen_Amsterdam
 * **$2** (string): folder_name - Name of the pipeline folder
 * **$3** (string): data - Job parameters could be json, url encoded or data file
 
-### function bootstrap_sia_jenkins_environment {
+### bootstrap_sia_jenkins_environment()
 
 Bootstap a SIA Docker Jenkins environment.
 
@@ -495,7 +514,7 @@ bootstrap_sia_jenkins_environment
 
 _Function has no arguments._
 
-### function jenkins_parameter_replace {
+### jenkins_parameter_replace()
 
 Replace pipeline parameters in SIA Jenkinsfiles.
 
@@ -511,7 +530,7 @@ jenkins_parameter_replace signalen/Jenkinsfile.acceptance JENKINS_NODE master
 * **$2** (string): key - Key name which holds value to replace
 * **$3** (string): value - Value to replace with
 
-### function prepare_github_repositories {
+### prepare_github_repositories()
 
 Prepare the SIA GitHub repositories, this will clone and modify the SIA repositories.
 
