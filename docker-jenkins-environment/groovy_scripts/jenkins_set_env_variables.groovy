@@ -14,7 +14,7 @@ if (envVarsNodePropertyList == null || envVarsNodePropertyList.size() == 0) {
   envVars = envVarsNodePropertyList.get(0).getEnvVars()
 }
 
-envVars.put("DOCKER_REGISTRY_HOST", "http://172.17.0.1:5000")
-envVars.put("DOCKER_REGISTRY", "172.17.0.1:5000")
+envVars.put("DOCKER_REGISTRY_HOST", "http://localhost:5000")
+envVars.put("DOCKER_REGISTRY", "localhost:5000")
 
 instance.save()

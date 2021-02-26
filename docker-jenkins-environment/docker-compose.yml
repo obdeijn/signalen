@@ -6,7 +6,7 @@ services:
       dockerfile: ./Dockerfile
     privileged: true
     environment:
-      - DOCKER_REGISTRY=172.17.0.1:5000
+      - DOCKER_REGISTRY=localhost:5000
     user: root
     ports:
       - '8081:8080'
