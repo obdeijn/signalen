@@ -6,7 +6,7 @@ services:
       dockerfile: ./Dockerfile
     privileged: true
     environment:
-      - DOCKER_REGISTRY=172.17.0.1:5000
+      - DOCKER_REGISTRY=172.24.0.1:5000
     user: root
     ports:
       - '8081:8080'
@@ -40,7 +40,7 @@ services:
     container_name: smee-client
     ports:
       - 8083:3000
-    command: [--url, "https://smee.io/rMm3gwdjhMxFnkZg", --target, "http://172.17.0.1:8081/github-webhook/"]
+    command: [--url, "https://smee.io/rMm3gwdjhMxFnkZg", --target, "http://172.24.0.1:8081/github-webhook/"]
 
 volumes:
   registry_data: null

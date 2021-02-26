@@ -655,8 +655,8 @@ function jenkins_parameter_replace {
   local key=$2
   local value=$3
 
-  echo sed -i "s,\(${key} = \).*,\1'${value}'," "$jenkins_file"
-  sed -i "s,\(${key} = \).*,\1'${value}'," "$jenkins_file"
+  echo gsed -i "s,\(${key} = \).*,\1'${value}'," "$jenkins_file"
+  gsed -i "s,\(${key} = \).*,\1'${value}'," "$jenkins_file"
   echo
 }
 
@@ -679,7 +679,7 @@ function prepare_github_repositories {
     jenkins_parameter_replace ./Jenkinsfile.acceptance JENKINS_TARGET docker
     jenkins_parameter_replace ./Jenkinsfile.acceptance SIGNALEN_REPOSITORY "${GITHUB_USER}/signalen"
     jenkins_parameter_replace ./Jenkinsfile.acceptance SIGNALS_FRONTEND_REPOSITORY "${GITHUB_USER}/signals-frontend"
-    jenkins_parameter_replace ./Jenkinsfile.acceptance DOCKER_BUILD_ARG_REGISTRY_HOST 172.17.0.1:5000
+    jenkins_parameter_replace ./Jenkinsfile.acceptance DOCKER_BUILD_ARG_REGISTRY_HOST 172.24.0.1:5000
     jenkins_parameter_replace ./Jenkinsfile.acceptance SLACK_NOTIFICATIONS_CHANNEL ""
     jenkins_parameter_replace ./Jenkinsfile.acceptance JENKINS_NODE "master"
     jenkins_parameter_replace ./Jenkinsfile.acceptance DOCKER_REGISTRY_AUTH ""
@@ -687,7 +687,7 @@ function prepare_github_repositories {
     jenkins_parameter_replace ./Jenkinsfile.release JENKINS_TARGET docker
     jenkins_parameter_replace ./Jenkinsfile.release SIGNALEN_REPOSITORY "${GITHUB_USER}/signalen"
     jenkins_parameter_replace ./Jenkinsfile.release SIGNALS_FRONTEND_REPOSITORY "${GITHUB_USER}/signals-frontend"
-    jenkins_parameter_replace ./Jenkinsfile.release DOCKER_BUILD_ARG_REGISTRY_HOST 172.17.0.1:5000
+    jenkins_parameter_replace ./Jenkinsfile.release DOCKER_BUILD_ARG_REGISTRY_HOST 172.24.0.1:5000
     jenkins_parameter_replace ./Jenkinsfile.release SLACK_NOTIFICATIONS_CHANNEL ""
     jenkins_parameter_replace ./Jenkinsfile.release JENKINS_NODE "master"
     jenkins_parameter_replace ./Jenkinsfile.release DOCKER_REGISTRY_AUTH ""
@@ -765,4 +765,4 @@ GITHUB_USER=$(github_user_get)
 log_info "this script will continue with GitHub user: ${GITHUB_USER}"
 
 prepare_github_repositories
-bootstrap_sia_jenkins_environment
+# bootstrap_sia_jenkins_environment
