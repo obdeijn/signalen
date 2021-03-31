@@ -1,7 +1,4 @@
 {
-  "featureFlags": {
-    "fetchQuestionsFromBackend": true
-  },
   "language": {
     "footer2": "op werkdagen van 08.00 tot 17.00 uur.",
     "phoneNumber": "(0294) 491 391",
