@@ -1,0 +1,45 @@
+version: '3.8'
+services:
+  jenkins:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    privileged: true
+    environment:
+      - DOCKER_REGISTRY=localhost:5000
+    user: root
+    ports:
+      - '8081:8080'
+      - '50000:50000'
+    container_name: jenkins
+    volumes:
+      - ~/Volumes/jenkins:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  registry:
+    image: registry:2
+    ports:
+      - 5000:5000
+    environment:
+      - REGISTRY_STORAGE_DELETE_ENABLED=true
+    volumes:
+      - registry_data:/var/lib/registry
+
+  registry-ui:
+    image: jc21/registry-ui
+    ports:
+      - 8082:80
+    environment:
+      - NODE_ENV=production
+      - REGISTRY_HOST=registry:5000
+      - REGISTRY_STORAGE_DELETE_ENABLED=true
+
+  smee:
+    image: deltaprojects/smee-client
+    container_name: smee-client
+    ports:
+      - 8083:3000
+    command: [--url, "https://smee.io/rMm3gwdjhMxFnkZg", --target, "http://jenkins:8080/github-webhook/"]
+
+volumes:
+  registry_data: null

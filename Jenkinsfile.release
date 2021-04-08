@@ -5,7 +5,7 @@ signalenReleasePipeline {
   JENKINS_GITHUB_CREDENTIALS_ID = '5b5e63e2-8db7-48c7-8e14-41cbd10eeb4a' // Global Jenkins Github secret token ID
   DOMAINS = ['amsterdam', 'amsterdamsebos', 'weesp'] // Front-end domains to build and deploy
 
-  JENKINS_TARGET='production' // Docker is used for development, production for production
+  JENKINS_TARGET= 'production' // Docker is used for development, production for production
   SIGNALEN_REPOSITORY = 'Amsterdam/signalen' // The signalen mono repository
   SIGNALS_FRONTEND_REPOSITORY = 'Amsterdam/signals-frontend' // The front-end repository
   DOCKER_BUILD_ARG_REGISTRY_HOST = 'docker-registry.data.amsterdam.nl' // Used as Dockerfile ARG
