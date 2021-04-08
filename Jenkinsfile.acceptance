@@ -11,6 +11,7 @@ signalenAcceptancePipeline {
   SIGNALEN_REPOSITORY = 'Amsterdam/signalen' // The signalen mono repository
   SIGNALS_FRONTEND_REPOSITORY = 'Amsterdam/signals-frontend' // The front-end repository
   DOCKER_BUILD_ARG_REGISTRY_HOST = 'docker-registry.data.amsterdam.nl' // Used as Dockerfile ARG
+  DOCKER_BUILD_ARG_DOCKER_IMAGE_TAG = 'latest' // Used as Dockerfile ARG
   SLACK_NOTIFICATIONS_CHANNEL = '#ci-signalen' // Build events will be posted to this channel
   JENKINS_NODE = 'BS16 || BS17' // Jenkins client which will run this pipeline
   DOCKER_REGISTRY_AUTH = 'docker_registry_auth' // docker_registry_auth is the ID of a global Jenkins secret
