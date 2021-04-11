@@ -31,6 +31,7 @@ signalenAcceptancePipeline {
   SIGNALEN_REPOSITORY = 'aditudorache/signalen'
   SIGNALS_FRONTEND_REPOSITORY = 'aditudorache/signals-frontend'
   DOCKER_BUILD_ARG_REGISTRY_HOST = '172.17.0.1:5000'
+  DOCKER_BUILD_ARG_DOCKER_IMAGE_TAG = 'latest' // Used as Dockerfile ARG
   SLACK_NOTIFICATIONS_CHANNEL = ''
   JENKINS_NODE = 'master'
   DOCKER_REGISTRY_AUTH = ''

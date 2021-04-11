@@ -1,6 +1,7 @@
-def buildAndPushDockerImage(String dockerBuildArgRegistryHost, String environment, String domain) {
+def buildAndPushDockerImage(String dockerBuildArgRegistryHost, String environment, String domain, String dockerBuildArgImageTag) {
   log.console("building ${domain} ${environment} domain image: ${env.RELEASE_DESCRIPTION}")
   log.console("dockerBuildArgRegistryHost:, ${dockerBuildArgRegistryHost}")
+  log.console("dockerBuildArgImageTag:, ${dockerBuildArgImageTag}")
 
   def environmentAbbreviations = [acceptance: 'acc', production: 'prod']
 
@@ -8,9 +9,10 @@ def buildAndPushDockerImage(String dockerBuildArgRegistryHost, String environmen
     docker.withRegistry(env.DOCKER_REGISTRY_HOST, env.DOCKER_REGISTRY_AUTH) {
       def image = docker.build(
         "ois/signals-${domain}:${env.BUILD_NUMBER}", [
-          "--build-arg DOCKER_REGISTRY=${dockerBuildArgRegistryHost} ",
           '--shm-size 1G ',
           "--build-arg BUILD_ENV=${environmentAbbreviations[environment]} ",
+          "--build-arg DOCKER_REGISTRY=${dockerBuildArgRegistryHost} ",
+          "--build-arg DOCKER_IMAGE_TAG=${dockerBuildArgImageTag} ",
           "${env.WORKSPACE}/signalen/domains/${domain}"
         ].join(' ')
       )

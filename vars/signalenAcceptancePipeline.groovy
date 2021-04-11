@@ -69,7 +69,7 @@ def call(Closure body) {
           buildAndPushSignalsFrontendDockerImage(
             pipelineParams.DOCKER_BUILD_ARG_REGISTRY_HOST,
             pipelineParams.SIGNALS_FRONTEND_BRANCH,
-            'signals-frontend'
+            pipelineParams.DOCKER_BUILD_ARG_DOCKER_IMAGE_TAG
           )
         }
       }
@@ -80,6 +80,7 @@ def call(Closure body) {
             pipelineParams.DOCKER_BUILD_ARG_REGISTRY_HOST,
             pipelineParams.ENVIRONMENT,
             pipelineParams.DOMAINS,
+            pipelineParams.DOCKER_BUILD_ARG_DOCKER_IMAGE_TAG
           )
         }
       }
