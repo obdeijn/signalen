@@ -28,3 +28,16 @@ validate-all-schemas           validate all domain JSON schema configuration fil
 validate-local-schema          validate configuration schema in current branch. Usage `make SIGNALS_FRONTEND_PATH=../signals-frontend DOMAIN=amsterdam ENVIRONMENT=development validate-local-schema
 validate-schema                validate single domain schema configuration file. Usage `make DOMAIN=amsterdam ENVIRONMENT=development SCHEMA_DEFINITION_GIT_REF=master validate-schema
 ```
+
+## How to local test a specific version/image of the signals-frontend
+* Install the jenkins local environment. See `./jenkins/bootstrap-docker-jenkins.md`
+* cd ./jenkins && docker-compose up
+* Open ./docker-compose.yml
+* Change the build arguments:
+```
+    - DOCKER_REGISTRY=localhost:5000
+    - DOCKER_IMAGE_TAG=6
+
+```
+* Run `make start`. The specific version from the local repository will be build and spinned up
+
