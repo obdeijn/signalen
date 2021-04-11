@@ -13,8 +13,8 @@ services:
       - '50000:50000'
     container_name: jenkins
     volumes:
-      - ~/Volumes/jenkins:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./data/jenkins:/var/jenkins_home
 
   registry:
     image: registry:2
@@ -23,7 +23,7 @@ services:
     environment:
       - REGISTRY_STORAGE_DELETE_ENABLED=true
     volumes:
-      - registry_data:/var/lib/registry
+      - ./data/registry:/var/lib/registry
 
   registry-ui:
     image: jc21/registry-ui
@@ -40,6 +40,3 @@ services:
     ports:
       - 8083:3000
     command: [--url, "https://smee.io/rMm3gwdjhMxFnkZg", --target, "http://jenkins:8080/github-webhook/"]
-
-volumes:
-  registry_data: null
