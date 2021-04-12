@@ -27,7 +27,7 @@ GITHUB_API_URL=https://api.github.com
 CACHE_DIRECTORY=./cache
 
 JENKINS_CRUMB=$(
-  curl --silent \
+  curl \
     --cookie-jar jenkins_admin_cookies.txt \
     --user "${JENKINS_ADMIN_USER}:${JENKINS_ADMIN_PASSWORD}" \
     $JENKINS_DOCKER_URL'/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)'
@@ -638,7 +638,7 @@ function bootstrap_sia_jenkins_environment() {
   log_info "bootstap - installing Jenkins plugins (will take a while, see docker logs for progress)"
   _jenkins_groovy jenkins_install_plugins
 
-  log_info "bootstap - restart Jenkis and wait until it is reachable again"
+  log_info "bootstap - restart Jenkins and wait until it is reachable again"
   jenkins_safe_restart
 
   log_info "adding ${GITHUB_USER} GitHub credentials to Jenkins"
@@ -720,7 +720,13 @@ function prepare_github_repositories() {
   }
 
   log_info "github - check if GitHub repository ${GITHUB_USER}/signals-frontend exists"
-  github_repository_exists signals-frontend || github_repo_fork Amsterdam signals-frontend
+  github_repository_exists signals-frontend || {
+    cd "$CACHE_DIRECTORY" || { log_error "cache directory does not exist: ${CACHE_DIRECTORY}"; exit 1; }
+
+    github_repo_fork Amsterdam signals-frontend
+
+    cd "$current_directory" || { log_error "could not open directory: ${current_directory}"; exit 1; }
+  }
 
   log_info "github - create GitHub signalen web hook"
   github_webhook_create signalen "$SMEE_PROXY_URL"
