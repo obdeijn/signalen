@@ -8,13 +8,10 @@ This script configures a local Docker environment with SIA pipelines.
 
 Instructions:
 
-* Fork the repository into your own.
-  This is needed because the scripts are making automatic checkins to the github repository.
-* Clone your own version out, cd to that folder before following the next steps.
 * Start the Jenkins docker environment and bootstrap it:
-cd ~/signalen/docker-jenkins-environment
+cd ~/signalen/jenkins
 docker-compose up
-./bootstrap_sia_jenkins_environment.sh
+./bootstrap-docker-jenkins.sh
 
 Generate shell script Markdown documentation:
 
