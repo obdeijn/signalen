@@ -7,9 +7,14 @@ import GitHubService from '../lib/github.service'
 import JiraService from '../lib/jira.service'
 import ReleaseService from '../lib/release.service'
 
-import {loadLatestRelease, loadPendingRelease, loadRelease} from '../lib/release.cli'
+import {
+  loadLatestRelease,
+  loadPendingRelease,
+  loadRelease
+} from '../lib/release.cli'
 
 import {mainMenu} from '../lib/release.menus'
+import configuration from '../lib/configuration'
 
 import {
   gitHubToken,
@@ -29,7 +34,11 @@ export default class ReleaseCommand extends Command {
 
   static flags: Input<any> = {
     help: flags.help({char: 'h', description: 'show release help'}),
-    repository, gitHubToken, jiraUrl, jiraUser, jiraToken
+    repository,
+    gitHubToken,
+    jiraUrl,
+    jiraUser,
+    jiraToken
   }
 
   async run() {
@@ -37,21 +46,35 @@ export default class ReleaseCommand extends Command {
 
     renderHeader('manager')
 
-    flags.repository = flags.repository || await setRepository()
-    flags.gitHubToken = flags.gitHubToken || await setGitHubToken()
-    flags.jiraUrl = flags.jiraUrl || await setJiraUrl()
-    flags.jiraUser = flags.jiraUser || await setJiraUser()
-    flags.jiraToken = flags.jiraToken || await setJiraToken()
+    // update the configuration flags when provided
+    Object.entries(flags).forEach(([name, value]) =>
+      configuration.set(name, value)
+    )
+
+    flags.repository = await setRepository()
+    flags.gitHubToken = await setGitHubToken()
+    flags.jiraUrl = await setJiraUrl()
+    flags.jiraUser = await setJiraUser()
+    flags.jiraToken = await setJiraToken()
 
     renderHeader('loading release data')
 
-    const gitHubService = new GitHubService(flags.repository, flags.gitHubToken)
-    const jiraService = new JiraService(flags.jiraUser, flags.jiraToken, flags.jiraUrl)
+    const gitHubService = new GitHubService(
+      flags.repository,
+      flags.gitHubToken
+    )
+    const jiraService = new JiraService(
+      flags.jiraUser,
+      flags.jiraToken,
+      flags.jiraUrl
+    )
     const releaseService = new ReleaseService(gitHubService, jiraService)
 
     const latestRelease = await loadLatestRelease(releaseService)
     const pendingRelease = await loadPendingRelease(releaseService)
-    const release = pendingRelease ? await loadRelease(pendingRelease, releaseService) : undefined
+    const release = pendingRelease ?
+      await loadRelease(pendingRelease, releaseService) :
+      undefined
 
     await sleep(0.5)
 
